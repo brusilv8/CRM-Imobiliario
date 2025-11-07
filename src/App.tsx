@@ -9,6 +9,8 @@ import Dashboard from "./pages/Dashboard";
 import Leads from "./pages/Leads";
 import Properties from "./pages/Properties";
 import Kanban from "./pages/Kanban";
+import Calendar from "./pages/Calendar";
+import Proposals from "./pages/Proposals";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 
@@ -54,6 +56,20 @@ const App = () => (
             <ProtectedRoute>
               <AppLayout>
                 <Properties />
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/calendar" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <Calendar />
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/proposals" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <Proposals />
               </AppLayout>
             </ProtectedRoute>
           } />

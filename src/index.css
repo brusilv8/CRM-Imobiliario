@@ -166,3 +166,46 @@ All colors MUST be HSL.
     background: var(--gradient-hero);
   }
 }
+
+/* React Big Calendar Styles */
+@import 'react-big-calendar/lib/css/react-big-calendar.css';
+
+.rbc-calendar {
+  font-family: 'Inter', sans-serif;
+}
+
+.rbc-header {
+  @apply py-3 font-semibold text-sm border-b border-border;
+}
+
+.rbc-today {
+  @apply bg-primary/5;
+}
+
+.rbc-event {
+  @apply rounded-md px-2 py-1 text-xs font-medium;
+}
+
+.rbc-event-label {
+  @apply text-xs;
+}
+
+.rbc-toolbar button {
+  @apply px-3 py-1.5 rounded-md text-sm font-medium transition-colors border border-border bg-background;
+}
+
+.rbc-toolbar button:hover {
+  @apply bg-muted;
+}
+
+.rbc-toolbar button.rbc-active {
+  @apply bg-primary text-primary-foreground border-primary;
+}
+
+.rbc-off-range {
+  @apply text-muted-foreground;
+}
+
+.rbc-off-range-bg {
+  @apply bg-muted/30;
+}
