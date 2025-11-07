@@ -1,0 +1,30 @@
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "./AppSidebar";
+
+interface AppLayoutProps {
+  children: React.ReactNode;
+}
+
+export function AppLayout({ children }: AppLayoutProps) {
+  return (
+    <SidebarProvider>
+      <div className="flex min-h-screen w-full bg-muted/30">
+        <AppSidebar />
+        <div className="flex-1 flex flex-col">
+          <header className="h-16 border-b bg-card flex items-center px-6 sticky top-0 z-10">
+            <SidebarTrigger className="mr-4" />
+            <div className="flex-1 flex items-center justify-between">
+              <h2 className="text-lg font-semibold">CRM Imobiliário</h2>
+              <div className="flex items-center gap-4">
+                {/* Espaço para notificações e perfil */}
+              </div>
+            </div>
+          </header>
+          <main className="flex-1 p-6">
+            {children}
+          </main>
+        </div>
+      </div>
+    </SidebarProvider>
+  );
+}
