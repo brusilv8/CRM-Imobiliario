@@ -22,12 +22,12 @@ import {
 } from "@/components/ui/sidebar";
 
 const menuItems = [
-  { title: "Dashboard", url: "/", icon: LayoutDashboard },
+  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Leads", url: "/leads", icon: Users },
+  { title: "Pipeline", url: "/kanban", icon: BarChart3 },
   { title: "Imóveis", url: "/properties", icon: Home },
   { title: "Agenda", url: "/calendar", icon: Calendar },
   { title: "Propostas", url: "/proposals", icon: FileText },
-  { title: "Relatórios", url: "/reports", icon: BarChart3 },
   { title: "Configurações", url: "/settings", icon: Settings },
 ];
 

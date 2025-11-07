@@ -1,47 +1,70 @@
 import { Card } from "@/components/ui/card";
-
-interface FunnelStage {
-  name: string;
-  count: number;
-  percentage: number;
-  color: string;
-}
-
-const stages: FunnelStage[] = [
-  { name: "Novos Leads", count: 245, percentage: 100, color: "bg-status-new" },
-  { name: "Contato Inicial", count: 189, percentage: 77, color: "bg-primary" },
-  { name: "Qualificados", count: 142, percentage: 58, color: "bg-status-qualified" },
-  { name: "Visita Agendada", count: 98, percentage: 40, color: "bg-warning" },
-  { name: "Proposta Enviada", count: 67, percentage: 27, color: "bg-status-proposal" },
-  { name: "Negociação", count: 45, percentage: 18, color: "bg-secondary" },
-  { name: "Vendido", count: 28, percentage: 11, color: "bg-status-won" },
-];
+import { Skeleton } from "@/components/ui/skeleton";
+import { useFunnelData } from "@/hooks/useDashboardMetrics";
 
 export function FunnelChart() {
+  const { data: funnelData, isLoading } = useFunnelData();
+
+  if (isLoading) {
+    return (
+      <Card className="p-6">
+        <h3 className="font-semibold mb-6">Funil de Vendas</h3>
+        <div className="space-y-3">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div key={i}>
+              <Skeleton className="h-4 w-32 mb-2" />
+              <Skeleton className="h-8 w-full" />
+            </div>
+          ))}
+        </div>
+      </Card>
+    );
+  }
+
+  if (!funnelData || funnelData.length === 0) {
+    return (
+      <Card className="p-6">
+        <h3 className="font-semibold mb-6">Funil de Vendas</h3>
+        <p className="text-muted-foreground text-center py-8">
+          Nenhum dado disponível no funil
+        </p>
+      </Card>
+    );
+  }
+
+  const maxValue = Math.max(...funnelData.map(stage => stage.value));
+
   return (
     <Card className="p-6">
       <h3 className="font-semibold mb-6">Funil de Vendas</h3>
       <div className="space-y-3">
-        {stages.map((stage, index) => (
-          <div key={stage.name} className="relative">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-sm font-medium">{stage.name}</span>
-              <span className="text-sm text-muted-foreground">
-                {stage.count} ({stage.percentage}%)
-              </span>
-            </div>
-            <div className="w-full bg-muted rounded-full h-8 relative overflow-hidden">
-              <div
-                className={`h-full ${stage.color} rounded-full transition-all duration-500 flex items-center justify-end px-3`}
-                style={{ width: `${stage.percentage}%` }}
-              >
-                <span className="text-xs font-medium text-white">
-                  {stage.count}
+        {funnelData.map((stage) => {
+          const percentage = maxValue > 0 ? Math.round((stage.value / maxValue) * 100) : 0;
+          
+          return (
+            <div key={stage.name} className="relative">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-sm font-medium">{stage.name}</span>
+                <span className="text-sm text-muted-foreground">
+                  {stage.value} ({percentage}%)
                 </span>
               </div>
+              <div className="w-full bg-muted rounded-full h-8 relative overflow-hidden">
+                <div
+                  className="h-full rounded-full transition-all duration-500 flex items-center justify-end px-3"
+                  style={{ 
+                    width: `${percentage}%`,
+                    backgroundColor: stage.color || 'hsl(var(--primary))'
+                  }}
+                >
+                  <span className="text-xs font-medium text-white">
+                    {stage.value}
+                  </span>
+                </div>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </Card>
   );

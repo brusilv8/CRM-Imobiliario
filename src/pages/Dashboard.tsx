@@ -9,8 +9,13 @@ import {
 import { StatCard } from "@/components/dashboard/StatCard";
 import { FunnelChart } from "@/components/dashboard/FunnelChart";
 import { RecentActivity } from "@/components/dashboard/RecentActivity";
+import { useDashboardMetrics, useFunnelData, useRecentActivities } from "@/hooks/useDashboardMetrics";
+import { useImoveis } from "@/hooks/useImoveis";
 
 export default function Dashboard() {
+  const { data: metrics, isLoading: metricsLoading } = useDashboardMetrics();
+  const { data: imoveis } = useImoveis();
+
   return (
     <div className="space-y-6">
       <div>
@@ -24,42 +29,38 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <StatCard
           title="Leads Ativos"
-          value={245}
+          value={metricsLoading ? "-" : metrics?.totalLeads || 0}
           icon={Users}
-          trend={{ value: 12, isPositive: true }}
           iconColor="bg-primary"
         />
         <StatCard
           title="Taxa de Conversão"
-          value="11.4%"
+          value={metricsLoading ? "-" : `${metrics?.taxaConversao || 0}%`}
           icon={TrendingUp}
-          trend={{ value: 2.3, isPositive: true }}
           iconColor="bg-secondary"
         />
         <StatCard
           title="Imóveis Cadastrados"
-          value={156}
+          value={imoveis?.length || 0}
           icon={Home}
-          trend={{ value: 8, isPositive: true }}
           iconColor="bg-status-qualified"
         />
         <StatCard
           title="Visitas Hoje"
-          value={12}
+          value={metricsLoading ? "-" : metrics?.visitasHoje || 0}
           icon={Calendar}
           iconColor="bg-warning"
         />
         <StatCard
-          title="Propostas Pendentes"
-          value={23}
+          title="Propostas em Análise"
+          value={metricsLoading ? "-" : metrics?.propostasAnalise || 0}
           icon={FileText}
           iconColor="bg-status-proposal"
         />
         <StatCard
-          title="Meta do Mês"
-          value="68%"
+          title="Leads por Origem"
+          value={metrics?.leadsPorOrigem?.length || 0}
           icon={Target}
-          trend={{ value: -5, isPositive: false }}
           iconColor="bg-primary-dark"
         />
       </div>
