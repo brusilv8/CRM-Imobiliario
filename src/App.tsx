@@ -11,6 +11,7 @@ import Properties from "./pages/Properties";
 import Kanban from "./pages/Kanban";
 import Calendar from "./pages/Calendar";
 import Proposals from "./pages/Proposals";
+import Settings from "./pages/Settings";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 
@@ -70,6 +71,13 @@ const App = () => (
             <ProtectedRoute>
               <AppLayout>
                 <Proposals />
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/settings" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <Settings />
               </AppLayout>
             </ProtectedRoute>
           } />
