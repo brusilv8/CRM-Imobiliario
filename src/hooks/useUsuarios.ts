@@ -9,11 +9,19 @@ export function useUsuarios() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('usuarios')
-        .select('*')
+        .select(`
+          *,
+          user_roles!user_roles_user_id_fkey(role)
+        `)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data as Usuario[];
+      
+      // Transform to include role from user_roles table
+      return (data || []).map(usuario => ({
+        ...usuario,
+        role: usuario.user_roles?.[0]?.role || 'assistente'
+      })) as Usuario[];
     },
   });
 }
@@ -26,7 +34,10 @@ export function useUsuario(userId?: string) {
       
       const { data, error } = await supabase
         .from('usuarios')
-        .select('*')
+        .select(`
+          *,
+          user_roles!user_roles_user_id_fkey(role)
+        `)
         .eq('auth_user_id', userId)
         .maybeSingle();
 
@@ -42,16 +53,27 @@ export function useUsuario(userId?: string) {
               nome_completo: user.email?.split('@')[0] || 'Usuário',
               ativo: true,
             })
-            .select()
+            .select(`
+              *,
+              user_roles!user_roles_user_id_fkey(role)
+            `)
             .single();
           
           if (insertError) throw insertError;
-          return newUser as Usuario;
+          
+          return {
+            ...newUser,
+            role: newUser.user_roles?.[0]?.role || 'assistente'
+          } as Usuario;
         }
       }
 
       if (error) throw error;
-      return data as Usuario;
+      
+      return data ? {
+        ...data,
+        role: data.user_roles?.[0]?.role || 'assistente'
+      } as Usuario : null;
     },
     enabled: !!userId,
   });
@@ -94,18 +116,31 @@ export function useUpdateUsuarioRole() {
       userId: string;
       role: 'admin' | 'corretor' | 'assistente' | 'supervisor';
     }) => {
-      const { data, error } = await supabase
+      // Get auth_user_id from usuarios
+      const { data: usuario } = await supabase
         .from('usuarios')
-        .update({ role, updated_at: new Date().toISOString() })
+        .select('auth_user_id')
         .eq('id', userId)
-        .select()
         .single();
 
+      if (!usuario?.auth_user_id) throw new Error('Usuário não encontrado');
+
+      // Delete existing roles
+      await supabase
+        .from('user_roles')
+        .delete()
+        .eq('user_id', usuario.auth_user_id);
+
+      // Insert new role
+      const { error } = await supabase
+        .from('user_roles')
+        .insert({ user_id: usuario.auth_user_id, role });
+
       if (error) throw error;
-      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['usuarios'] });
+      queryClient.invalidateQueries({ queryKey: ['usuario'] });
       toast.success('Função atualizada com sucesso!');
     },
     onError: (error: any) => {
@@ -125,19 +160,38 @@ export function useActivateUsuario() {
       userId: string;
       role: 'admin' | 'corretor' | 'assistente' | 'supervisor';
     }) => {
-      const { data, error } = await supabase
+      // Get auth_user_id from usuarios
+      const { data: usuario } = await supabase
+        .from('usuarios')
+        .select('auth_user_id')
+        .eq('id', userId)
+        .single();
+
+      if (!usuario?.auth_user_id) throw new Error('Usuário não encontrado');
+
+      // Activate user
+      const { error: updateError } = await supabase
         .from('usuarios')
         .update({ 
-          role, 
           ativo: true,
           updated_at: new Date().toISOString() 
         })
-        .eq('id', userId)
-        .select()
-        .single();
+        .eq('id', userId);
 
-      if (error) throw error;
-      return data;
+      if (updateError) throw updateError;
+
+      // Delete existing roles
+      await supabase
+        .from('user_roles')
+        .delete()
+        .eq('user_id', usuario.auth_user_id);
+
+      // Insert new role
+      const { error: roleError } = await supabase
+        .from('user_roles')
+        .insert({ user_id: usuario.auth_user_id, role });
+
+      if (roleError) throw roleError;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['usuarios'] });
