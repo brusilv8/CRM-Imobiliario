@@ -165,6 +165,31 @@ All colors MUST be HSL.
   .gradient-hero {
     background: var(--gradient-hero);
   }
+
+  /* Scrollbar styles */
+  .scrollbar-thin::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    @apply bg-border rounded-full;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    @apply bg-border/80;
+  }
+
+  .scrollbar-thumb-border::-webkit-scrollbar-thumb {
+    @apply bg-border;
+  }
+
+  .scrollbar-track-transparent::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
 }
 
 /* React Big Calendar Styles */

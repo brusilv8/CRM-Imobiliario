@@ -12,6 +12,7 @@ import { useFunilEtapas, useLeadsFunil, useUpdateLeadEtapa, useSyncLeadsToFunil 
 import { KanbanColumn } from "@/components/kanban/KanbanColumn";
 import { LeadCard } from "@/components/kanban/LeadCard";
 import { LeadDetailModal } from "@/components/kanban/LeadDetailModal";
+import { QuickLeadFormModal } from "@/components/kanban/QuickLeadFormModal";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -30,6 +31,7 @@ export default function Kanban() {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [quickFormOpen, setQuickFormOpen] = useState(false);
   const [filters, setFilters] = useState({
     temperatura: 'all',
     origem: 'all',
@@ -216,7 +218,10 @@ export default function Kanban() {
           </div>
         </div>
 
-        <Button className="gap-2 bg-primary hover:bg-primary/90">
+        <Button 
+          className="gap-2 bg-primary hover:bg-primary/90"
+          onClick={() => setQuickFormOpen(true)}
+        >
           <Users className="w-4 h-4" />
           Novo Atendimento
         </Button>
@@ -229,7 +234,7 @@ export default function Kanban() {
         onDragEnd={handleDragEnd}
         onDragCancel={handleDragCancel}
       >
-        <div className="flex gap-3 overflow-x-auto pb-4">
+        <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
           {etapas?.map((etapa) => {
             const leadsNaEtapa = filteredLeadsFunil?.filter(
               (lf: LeadFunil) => lf.etapa_id === etapa.id
@@ -255,6 +260,11 @@ export default function Kanban() {
         lead={selectedLead}
         open={detailModalOpen}
         onOpenChange={setDetailModalOpen}
+      />
+
+      <QuickLeadFormModal
+        open={quickFormOpen}
+        onOpenChange={setQuickFormOpen}
       />
     </div>
   );
