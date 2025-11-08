@@ -167,7 +167,7 @@ export interface Usuario {
   avatar_url?: string;
   cargo?: string;
   ativo: boolean;
-  role?: 'admin' | 'corretor' | 'assistente';
+  role?: 'admin' | 'supervisor' | 'corretor' | 'assistente';
   created_at: string;
   updated_at?: string;
 }
