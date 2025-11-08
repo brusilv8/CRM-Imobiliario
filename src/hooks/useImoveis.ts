@@ -40,20 +40,27 @@ export function useCreateImovel() {
 
   return useMutation({
     mutationFn: async (imovel: Omit<Imovel, 'id' | 'created_at'>) => {
+      console.log('🏠 Hook useCreateImovel chamado');
+      console.log('📋 Payload:', imovel);
+      
       const { data, error } = await supabase
         .from('imoveis')
         .insert(imovel)
         .select()
         .single();
 
+      console.log('🔍 Resposta Supabase:', { data, error });
+
       if (error) throw error;
       return data as Imovel;
     },
     onSuccess: () => {
+      console.log('✅ onSuccess - Imóvel criado');
       queryClient.invalidateQueries({ queryKey: ['imoveis'] });
       toast.success('Imóvel criado com sucesso!');
     },
     onError: (error: any) => {
+      console.error('❌ onError:', error);
       toast.error(error.message || 'Erro ao criar imóvel');
     },
   });

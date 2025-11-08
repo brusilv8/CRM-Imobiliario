@@ -94,16 +94,26 @@ export function PropertyFormModal({ open, onOpenChange }: PropertyFormModalProps
   };
 
   const onSubmit = async (data: PropertyFormData) => {
+    console.log('🟢 INÍCIO onSubmit');
+    console.log('📦 Dados:', data);
+    
     // Ensure required fields are present
     if (!data.tipo || !data.finalidade || !data.cep || !data.endereco || 
         !data.cidade || !data.estado || !data.bairro || !data.status) {
+      console.log('⚠️ Campos obrigatórios faltando');
       return;
     }
     
-    await createImovel.mutateAsync(data as any);
-    reset();
-    setStep(1);
-    onOpenChange(false);
+    try {
+      console.log('🚀 Chamando mutation...');
+      await createImovel.mutateAsync(data as any);
+      console.log('✅ Sucesso!');
+      reset();
+      setStep(1);
+      onOpenChange(false);
+    } catch (error: any) {
+      console.error('❌ ERRO:', error);
+    }
   };
 
   const handleClose = () => {
