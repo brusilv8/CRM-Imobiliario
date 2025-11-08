@@ -27,37 +27,33 @@ export function KanbanColumn({ etapa, leads, onLeadClick }: KanbanColumnProps) {
     : 0;
 
   return (
-    <div ref={setNodeRef} className="flex-shrink-0 w-64">
-      <Card className={`h-full transition-all ${isOver ? 'ring-2 ring-primary shadow-lg' : 'shadow-sm'}`}>
-        <div className="p-4 border-b bg-muted/30">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-3">
+    <div ref={setNodeRef} className="flex-shrink-0 w-[280px]">
+      <Card className={`h-full transition-all ${isOver ? 'ring-2 ring-primary shadow-lg' : ''}`}>
+        <div className="px-3 py-3 border-b">
+          <div className="flex items-center justify-between mb-1.5">
+            <div className="flex items-center gap-2">
               <div
-                className="w-3 h-3 rounded-full shadow-sm"
+                className="w-2.5 h-2.5 rounded-full"
                 style={{ backgroundColor: etapa.cor }}
               />
-              <h3 className="font-bold text-base">{etapa.nome}</h3>
+              <h3 className="font-semibold text-sm">{etapa.nome}</h3>
             </div>
             <Badge 
-              className="text-sm font-semibold px-2.5 py-1"
-              style={{ 
-                backgroundColor: `${etapa.cor}20`,
-                color: etapa.cor,
-                border: `1px solid ${etapa.cor}40`
-              }}
+              variant="secondary"
+              className="text-xs font-semibold px-2 py-0.5"
             >
               {leads.length}
             </Badge>
           </div>
           
           {leads.length > 0 && (
-            <div className="text-xs text-muted-foreground font-medium">
-              ⌀ {tempoMedio} {tempoMedio === 1 ? 'dia' : 'dias'} nesta etapa
+            <div className="text-[10px] text-muted-foreground">
+              ⌀ {tempoMedio}d nesta etapa
             </div>
           )}
         </div>
 
-        <div className="p-3 space-y-3 max-h-[calc(100vh-320px)] overflow-y-auto">
+        <div className="p-2 space-y-2 max-h-[calc(100vh-280px)] overflow-y-auto">
           {leads.map((leadFunil) => (
             <LeadCard
               key={leadFunil.id}

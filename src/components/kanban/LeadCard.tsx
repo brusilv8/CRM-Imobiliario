@@ -62,59 +62,59 @@ export function LeadCard({ lead, dataEntrada, isDragging, onClick }: LeadCardPro
           onClick();
         }
       }}
-      className={`p-4 cursor-grab active:cursor-grabbing hover:shadow-lg transition-all border-l-4 ${
+      className={`p-3 cursor-grab active:cursor-grabbing hover:shadow-md transition-all border-l-4 ${
         isDragging ? 'opacity-50 rotate-2 scale-105' : ''
       }`}
     >
-      <div className="space-y-3">
+      <div className="space-y-2">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
-            <h4 className="font-semibold text-base mb-1 truncate">{lead.nome}</h4>
-            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-              <Phone className="w-3.5 h-3.5 flex-shrink-0" />
+            <h4 className="font-semibold text-sm mb-1 truncate">{lead.nome}</h4>
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <Phone className="w-3 h-3 flex-shrink-0" />
               <span className="truncate">{lead.telefone}</span>
             </div>
             {lead.email && (
-              <div className="flex items-center gap-1.5 text-sm text-muted-foreground mt-0.5">
-                <Mail className="w-3.5 h-3.5 flex-shrink-0" />
+              <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
+                <Mail className="w-3 h-3 flex-shrink-0" />
                 <span className="truncate">{lead.email}</span>
               </div>
             )}
           </div>
-          <div className={`p-2 rounded-full ${temConfig.bg} flex-shrink-0`}>
-            <TempIcon className={`w-4 h-4 ${temConfig.color}`} />
+          <div className={`p-1.5 rounded-full ${temConfig.bg} flex-shrink-0`}>
+            <TempIcon className={`w-3.5 h-3.5 ${temConfig.color}`} />
           </div>
         </div>
 
         {lead.interesse && (
-          <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+          <p className="text-xs text-muted-foreground line-clamp-1 leading-tight">
             {lead.interesse}
           </p>
         )}
 
-        <div className="flex items-center gap-2 flex-wrap">
-          <Badge variant="outline" className="text-xs">
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <Badge variant="outline" className="text-[10px] px-1.5 py-0">
             {lead.origem}
           </Badge>
           
           {lead.orcamento_max && (
-            <Badge variant="secondary" className="text-xs">
-              até R$ {lead.orcamento_max.toLocaleString('pt-BR')}
+            <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+              até {(lead.orcamento_max / 1000).toFixed(0)}k
             </Badge>
           )}
           
           {diasParado > 0 && (
             <Badge 
               variant={diasParado > 7 ? 'destructive' : 'secondary'} 
-              className="text-xs"
+              className="text-[10px] px-1.5 py-0"
             >
-              {diasParado === 0 ? 'hoje' : `${diasParado}d parado`}
+              {diasParado}d
             </Badge>
           )}
         </div>
 
         {lead.observacoes && (
-          <p className="text-xs text-muted-foreground italic line-clamp-1 pt-1 border-t">
+          <p className="text-[10px] text-muted-foreground italic line-clamp-1 pt-1 border-t">
             {lead.observacoes}
           </p>
         )}

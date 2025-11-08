@@ -133,12 +133,12 @@ export default function Kanban() {
     : null;
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-start justify-between">
+    <div className="space-y-3">
+      <div className="flex items-start justify-between gap-4">
         <div className="flex-1">
-          <h1 className="text-3xl font-bold mb-4">Funil de Vendas</h1>
+          <h1 className="text-2xl font-bold mb-3">Funil de Vendas</h1>
           
-          <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap">
             <div className="flex items-center gap-2">
               <Button
                 variant={filters.temperatura === 'all' ? 'default' : 'outline'}
@@ -151,27 +151,27 @@ export default function Kanban() {
                 variant={filters.temperatura === 'hot' ? 'destructive' : 'outline'}
                 size="sm"
                 onClick={() => setFilters({ ...filters, temperatura: 'hot' })}
-                className="gap-2"
+                className="gap-1.5"
               >
-                <Flame className="w-4 h-4" />
+                <Flame className="w-3.5 h-3.5" />
                 Quente
               </Button>
               <Button
                 variant={filters.temperatura === 'warm' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setFilters({ ...filters, temperatura: 'warm' })}
-                className="gap-2"
+                className="gap-1.5"
               >
-                <Sun className="w-4 h-4" />
+                <Sun className="w-3.5 h-3.5" />
                 Morno
               </Button>
               <Button
                 variant={filters.temperatura === 'cold' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setFilters({ ...filters, temperatura: 'cold' })}
-                className="gap-2"
+                className="gap-1.5"
               >
-                <Snowflake className="w-4 h-4" />
+                <Snowflake className="w-3.5 h-3.5" />
                 Frio
               </Button>
             </div>
@@ -180,7 +180,7 @@ export default function Kanban() {
               value={filters.origem}
               onValueChange={(value) => setFilters({ ...filters, origem: value })}
             >
-              <SelectTrigger className="w-[160px] h-9">
+              <SelectTrigger className="w-[140px] h-9">
                 <SelectValue placeholder="Origem" />
               </SelectTrigger>
               <SelectContent>
@@ -198,9 +198,9 @@ export default function Kanban() {
                 variant="ghost"
                 size="sm"
                 onClick={clearFilters}
-                className="gap-2"
+                className="gap-1.5"
               >
-                <X className="w-4 h-4" />
+                <X className="w-3.5 h-3.5" />
                 Limpar
               </Button>
             )}
@@ -210,16 +210,16 @@ export default function Kanban() {
               size="sm"
               onClick={() => syncLeads.mutate()}
               disabled={syncLeads.isPending}
-              className="gap-2"
+              className="gap-1.5"
             >
-              <RefreshCw className={`w-4 h-4 ${syncLeads.isPending ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-3.5 h-3.5 ${syncLeads.isPending ? 'animate-spin' : ''}`} />
               Sincronizar
             </Button>
           </div>
         </div>
 
         <Button 
-          className="gap-2 bg-primary hover:bg-primary/90"
+          className="gap-2 bg-primary hover:bg-primary/90 h-9"
           onClick={() => setQuickFormOpen(true)}
         >
           <Users className="w-4 h-4" />
@@ -234,7 +234,7 @@ export default function Kanban() {
         onDragEnd={handleDragEnd}
         onDragCancel={handleDragCancel}
       >
-        <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
+        <div className="flex gap-2.5 overflow-x-auto pb-3 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
           {etapas?.map((etapa) => {
             const leadsNaEtapa = filteredLeadsFunil?.filter(
               (lf: LeadFunil) => lf.etapa_id === etapa.id
