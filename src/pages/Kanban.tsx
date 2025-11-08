@@ -240,16 +240,7 @@ export default function Kanban() {
         </div>
       </div>
 
-      <div className="flex items-center gap-2 mb-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={scrollToStart}
-          className="gap-1.5"
-        >
-          <ChevronLeft className="w-3.5 h-3.5" />
-          Início
-        </Button>
+      <div className="mb-2">
         <Button
           variant="outline"
           size="sm"
@@ -288,6 +279,18 @@ export default function Kanban() {
           {activeLead ? <LeadCard lead={activeLead} isDragging /> : null}
         </DragOverlay>
       </DndContext>
+
+      <div className="mt-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={scrollToStart}
+          className="gap-1.5"
+        >
+          <ChevronLeft className="w-3.5 h-3.5" />
+          Início
+        </Button>
+      </div>
 
       <LeadDetailModal
         lead={selectedLead}
