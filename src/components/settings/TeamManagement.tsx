@@ -33,7 +33,7 @@ const roleConfig = {
 export function TeamManagement() {
   const { user } = useAuth();
   const { data: currentUser } = useUsuario(user?.id);
-  const { data: usuarios, isLoading } = useUsuarios();
+  const { data: usuarios = [], isLoading } = useUsuarios();
   const updateRole = useUpdateUsuarioRole();
 
   const isCurrentUserAdmin = currentUser?.role === 'admin';
@@ -95,9 +95,18 @@ export function TeamManagement() {
               <TableBody>
                 {usuarios && usuarios.length > 0 ? (
                   usuarios.map((usuario) => {
-                    const role = usuario.role || 'assistente';
-                    const roleInfo = roleConfig[role as keyof typeof roleConfig];
-                    const RoleIcon = roleInfo.icon;
+                    // Validação segura de role
+                    const userRole = usuario.role && typeof usuario.role === 'string' 
+                      ? usuario.role.toLowerCase() 
+                      : 'assistente';
+                    
+                    // Garantir que o role seja válido
+                    const validRoles: Array<keyof typeof roleConfig> = ['admin', 'supervisor', 'corretor', 'assistente'];
+                    const role = validRoles.includes(userRole as any) 
+                      ? (userRole as keyof typeof roleConfig)
+                      : 'assistente';
+                    
+                    const roleInfo = roleConfig[role];
                     
                     // Validações de segurança para todos os campos
                     const nomeUsuario = typeof usuario.nome_completo === 'string' && usuario.nome_completo.trim() !== '' 
