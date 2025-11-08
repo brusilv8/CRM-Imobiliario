@@ -24,7 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { RefreshCw, Filter, X, Flame, Sun, Snowflake, Users } from "lucide-react";
+import { RefreshCw, Filter, X, Flame, Sun, Snowflake, Users, ChevronLeft, ChevronRight } from "lucide-react";
 import type { Lead, LeadFunil } from "@/types/database.types";
 
 export default function Kanban() {
@@ -37,6 +37,7 @@ export default function Kanban() {
     origem: 'all',
   });
   const [showFilters, setShowFilters] = useState(false);
+  const scrollContainerRef = useState<HTMLDivElement | null>(null)[0];
 
   const { data: etapas, isLoading: etapasLoading } = useFunilEtapas();
   const { data: leadsFunil, isLoading: leadsFunilLoading } = useLeadsFunil();
@@ -108,6 +109,20 @@ export default function Kanban() {
 
   const handleDragCancel = () => {
     setActiveId(null);
+  };
+
+  const scrollToStart = () => {
+    const container = document.querySelector('.kanban-scroll');
+    if (container) {
+      container.scrollTo({ left: 0, behavior: 'smooth' });
+    }
+  };
+
+  const scrollToEnd = () => {
+    const container = document.querySelector('.kanban-scroll');
+    if (container) {
+      container.scrollTo({ left: container.scrollWidth, behavior: 'smooth' });
+    }
   };
 
   if (etapasLoading || leadsFunilLoading) {
@@ -225,6 +240,26 @@ export default function Kanban() {
         </div>
       </div>
 
+      <div className="flex items-center gap-2 mb-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={scrollToStart}
+          className="gap-1.5"
+        >
+          <ChevronLeft className="w-3.5 h-3.5" />
+          Início
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={scrollToEnd}
+          className="gap-1.5"
+        >
+          Final
+          <ChevronRight className="w-3.5 h-3.5" />
+        </Button>
+      </div>
 
       <DndContext
         sensors={sensors}
