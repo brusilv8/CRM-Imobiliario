@@ -22,6 +22,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { useCreateImovel } from "@/hooks/useImoveis";
 import InputMask from "react-input-mask";
+import { toast } from "sonner";
 
 const propertySchema = z.object({
   tipo: z.string().min(1, "Tipo é obrigatório"),
@@ -113,6 +114,62 @@ export function PropertyFormModal({ open, onOpenChange }: PropertyFormModalProps
       onOpenChange(false);
     } catch (error: any) {
       console.error('❌ ERRO:', error);
+    }
+  };
+
+  const handleFinalSubmit = async () => {
+    console.log('🔵 BOTÃO CLICADO!');
+    
+    // Pegar todos os valores atuais do formulário
+    const formValues = watch();
+    console.log('📋 Estado atual:', formValues);
+    
+    // Validação básica
+    if (!formValues.tipo || !formValues.finalidade || !formValues.endereco || 
+        !formValues.cidade || !formValues.estado || !formValues.bairro || !formValues.cep) {
+      toast.error('Preencha todos os campos obrigatórios');
+      return;
+    }
+    
+    // Montar payload
+    const payload = {
+      tipo: formValues.tipo,
+      finalidade: formValues.finalidade,
+      descricao: formValues.descricao || null,
+      endereco: formValues.endereco,
+      numero: formValues.numero || null,
+      complemento: formValues.complemento || null,
+      bairro: formValues.bairro,
+      cidade: formValues.cidade,
+      estado: formValues.estado,
+      cep: formValues.cep,
+      valor_venda: formValues.valor_venda || null,
+      valor_aluguel: formValues.valor_aluguel || null,
+      valor_condominio: formValues.valor_condominio || null,
+      valor_iptu: formValues.valor_iptu || null,
+      quartos: formValues.quartos || null,
+      banheiros: formValues.banheiros || null,
+      vagas: formValues.vagas || null,
+      area_total: formValues.area_total || null,
+      area_util: formValues.area_util || null,
+      status: formValues.status || 'disponivel',
+    };
+    
+    console.log('🟢 INÍCIO onSubmit');
+    console.log('📦 Payload:', payload);
+    
+    try {
+      console.log('🚀 Chamando mutation...');
+      await createImovel.mutateAsync(payload as any);
+      console.log('✅ Sucesso!');
+      toast.success('Imóvel cadastrado com sucesso!');
+      reset();
+      setStep(1);
+      onOpenChange(false);
+    } catch (error: any) {
+      console.error('❌ Erro:', error);
+      console.error('❌ Detalhes:', error.message);
+      toast.error('Erro ao cadastrar: ' + (error.message || 'Erro desconhecido'));
     }
   };
 
@@ -397,10 +454,7 @@ export function PropertyFormModal({ open, onOpenChange }: PropertyFormModalProps
             ) : (
               <Button 
                 type="button"
-                onClick={() => {
-                  console.log('🔵 BOTÃO CLICADO!');
-                  handleSubmit(onSubmit)();
-                }}
+                onClick={handleFinalSubmit}
                 disabled={createImovel.isPending}
               >
                 {createImovel.isPending ? "Cadastrando..." : "Cadastrar Imóvel"}
