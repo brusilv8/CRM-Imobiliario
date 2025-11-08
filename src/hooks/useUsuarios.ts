@@ -113,3 +113,38 @@ export function useUpdateUsuarioRole() {
     },
   });
 }
+
+export function useActivateUsuario() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      userId,
+      role,
+    }: {
+      userId: string;
+      role: 'admin' | 'corretor' | 'assistente' | 'supervisor';
+    }) => {
+      const { data, error } = await supabase
+        .from('usuarios')
+        .update({ 
+          role, 
+          ativo: true,
+          updated_at: new Date().toISOString() 
+        })
+        .eq('id', userId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['usuarios'] });
+      toast.success('Membro adicionado à equipe com sucesso!');
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Erro ao adicionar membro à equipe');
+    },
+  });
+}

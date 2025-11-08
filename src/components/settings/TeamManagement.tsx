@@ -22,6 +22,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { Usuario } from '@/types/database.types';
 import { useAuth } from '@/hooks/useAuth';
+import { AddTeamMemberDialog } from './AddTeamMemberDialog';
 
 const roleConfig = {
   admin: { label: 'Admin', icon: Shield, variant: 'default' as const, color: 'text-primary' },
@@ -71,14 +72,22 @@ export function TeamManagement() {
     );
   }
 
+  // Filtrar apenas usuários ativos para mostrar na tabela
+  const activeUsers = usuarios.filter((u) => u.ativo);
+
   return (
     <>
       <Card>
         <CardHeader>
-          <CardTitle>Membros da Equipe</CardTitle>
-          <CardDescription>
-            Gerencie as funções dos membros da equipe ({usuarios?.length || 0} membros)
-          </CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Membros da Equipe</CardTitle>
+              <CardDescription>
+                Gerencie as funções dos membros da equipe ({activeUsers.length} membros ativos)
+              </CardDescription>
+            </div>
+            <AddTeamMemberDialog isCurrentUserAdmin={isCurrentUserAdmin} />
+          </div>
         </CardHeader>
         <CardContent>
           <div className="rounded-md border">
@@ -93,8 +102,8 @@ export function TeamManagement() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {usuarios && usuarios.length > 0 ? (
-                  usuarios.map((usuario) => {
+                {activeUsers && activeUsers.length > 0 ? (
+                  activeUsers.map((usuario) => {
                     // Validação segura de role
                     const userRole = usuario.role && typeof usuario.role === 'string' 
                       ? usuario.role.toLowerCase() 
