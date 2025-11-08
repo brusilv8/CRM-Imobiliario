@@ -1,8 +1,8 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card } from '@/components/ui/card';
-import { User, Users, Bell, Shield } from 'lucide-react';
+import { User, Users, Settings as SettingsIcon } from 'lucide-react';
 import { ProfileSettings } from '@/components/settings/ProfileSettings';
 import { TeamManagement } from '@/components/settings/TeamManagement';
+import { PreferencesSettings } from '@/components/settings/PreferencesSettings';
 
 export default function Settings() {
   return (
@@ -13,7 +13,7 @@ export default function Settings() {
       </div>
 
       <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="grid w-full max-w-md grid-cols-2">
+        <TabsList className="grid w-full max-w-2xl grid-cols-3">
           <TabsTrigger value="profile" className="flex items-center gap-2">
             <User className="w-4 h-4" />
             Perfil
@@ -21,6 +21,10 @@ export default function Settings() {
           <TabsTrigger value="team" className="flex items-center gap-2">
             <Users className="w-4 h-4" />
             Equipe
+          </TabsTrigger>
+          <TabsTrigger value="preferences" className="flex items-center gap-2">
+            <SettingsIcon className="w-4 h-4" />
+            Preferências
           </TabsTrigger>
         </TabsList>
 
@@ -30,6 +34,10 @@ export default function Settings() {
 
         <TabsContent value="team">
           <TeamManagement />
+        </TabsContent>
+
+        <TabsContent value="preferences">
+          <PreferencesSettings />
         </TabsContent>
       </Tabs>
     </div>
