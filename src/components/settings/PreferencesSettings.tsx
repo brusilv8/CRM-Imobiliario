@@ -8,6 +8,7 @@ import { Moon, Sun, Bell, Mail, LogOut } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { supabase } from '@/lib/supabase';
 
 export function PreferencesSettings() {
   const { signOut } = useAuth();
@@ -51,8 +52,37 @@ export function PreferencesSettings() {
   };
 
   const handleLogout = async () => {
-    await signOut();
-    navigate('/login');
+    try {
+      // 1. Obter sessão atual antes de deslogar
+      const { data: { session } } = await supabase.auth.getSession();
+
+      // 2. Deslogar no Supabase (com escopo global)
+      const { error } = await supabase.auth.signOut({ scope: 'global' });
+
+      if (error) {
+        console.error('Erro no signOut:', error);
+        throw error;
+      }
+
+      // 3. Limpar todos os dados locais
+      localStorage.clear();
+      sessionStorage.clear();
+
+      // 4. Mostrar mensagem de sucesso
+      toast.success('Logout realizado com sucesso!');
+
+      // 5. Redirecionar para login (forçando reload completo)
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 300);
+    } catch (error: any) {
+      console.error('Erro ao fazer logout:', error);
+      toast.error('Erro ao deslogar. Tente novamente.');
+
+      // Fallback: forçar logout mesmo com erro
+      localStorage.clear();
+      window.location.href = '/login';
+    }
   };
 
   return (
