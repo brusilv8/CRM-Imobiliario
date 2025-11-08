@@ -151,7 +151,6 @@ export function PropertyFormModal({ open, onOpenChange }: PropertyFormModalProps
       banheiros: formValues.banheiros || null,
       vagas: formValues.vagas || null,
       area_total: formValues.area_total || null,
-      area_util: formValues.area_util || null,
       status: formValues.status || 'disponivel',
     };
     
