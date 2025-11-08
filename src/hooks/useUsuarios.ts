@@ -9,19 +9,11 @@ export function useUsuarios() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('usuarios')
-        .select(`
-          *,
-          user_roles!user_roles_user_id_fkey(role)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      
-      // Transform to include role from user_roles table
-      return (data || []).map(usuario => ({
-        ...usuario,
-        role: usuario.user_roles?.[0]?.role || 'assistente'
-      })) as Usuario[];
+      return data as Usuario[];
     },
   });
 }
@@ -34,10 +26,7 @@ export function useUsuario(userId?: string) {
       
       const { data, error } = await supabase
         .from('usuarios')
-        .select(`
-          *,
-          user_roles!user_roles_user_id_fkey(role)
-        `)
+        .select('*')
         .eq('auth_user_id', userId)
         .maybeSingle();
 
@@ -53,27 +42,16 @@ export function useUsuario(userId?: string) {
               nome_completo: user.email?.split('@')[0] || 'Usuário',
               ativo: true,
             })
-            .select(`
-              *,
-              user_roles!user_roles_user_id_fkey(role)
-            `)
+            .select()
             .single();
           
           if (insertError) throw insertError;
-          
-          return {
-            ...newUser,
-            role: newUser.user_roles?.[0]?.role || 'assistente'
-          } as Usuario;
+          return newUser as Usuario;
         }
       }
 
       if (error) throw error;
-      
-      return data ? {
-        ...data,
-        role: data.user_roles?.[0]?.role || 'assistente'
-      } as Usuario : null;
+      return data as Usuario;
     },
     enabled: !!userId,
   });
@@ -116,31 +94,18 @@ export function useUpdateUsuarioRole() {
       userId: string;
       role: 'admin' | 'corretor' | 'assistente' | 'supervisor';
     }) => {
-      // Get auth_user_id from usuarios
-      const { data: usuario } = await supabase
+      const { data, error } = await supabase
         .from('usuarios')
-        .select('auth_user_id')
+        .update({ role, updated_at: new Date().toISOString() })
         .eq('id', userId)
+        .select()
         .single();
 
-      if (!usuario?.auth_user_id) throw new Error('Usuário não encontrado');
-
-      // Delete existing roles
-      await supabase
-        .from('user_roles')
-        .delete()
-        .eq('user_id', usuario.auth_user_id);
-
-      // Insert new role
-      const { error } = await supabase
-        .from('user_roles')
-        .insert({ user_id: usuario.auth_user_id, role });
-
       if (error) throw error;
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['usuarios'] });
-      queryClient.invalidateQueries({ queryKey: ['usuario'] });
       toast.success('Função atualizada com sucesso!');
     },
     onError: (error: any) => {
@@ -160,38 +125,19 @@ export function useActivateUsuario() {
       userId: string;
       role: 'admin' | 'corretor' | 'assistente' | 'supervisor';
     }) => {
-      // Get auth_user_id from usuarios
-      const { data: usuario } = await supabase
-        .from('usuarios')
-        .select('auth_user_id')
-        .eq('id', userId)
-        .single();
-
-      if (!usuario?.auth_user_id) throw new Error('Usuário não encontrado');
-
-      // Activate user
-      const { error: updateError } = await supabase
+      const { data, error } = await supabase
         .from('usuarios')
         .update({ 
+          role, 
           ativo: true,
           updated_at: new Date().toISOString() 
         })
-        .eq('id', userId);
+        .eq('id', userId)
+        .select()
+        .single();
 
-      if (updateError) throw updateError;
-
-      // Delete existing roles
-      await supabase
-        .from('user_roles')
-        .delete()
-        .eq('user_id', usuario.auth_user_id);
-
-      // Insert new role
-      const { error: roleError } = await supabase
-        .from('user_roles')
-        .insert({ user_id: usuario.auth_user_id, role });
-
-      if (roleError) throw roleError;
+      if (error) throw error;
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['usuarios'] });
