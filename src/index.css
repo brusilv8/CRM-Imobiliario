@@ -190,6 +190,33 @@ All colors MUST be HSL.
   .scrollbar-track-transparent::-webkit-scrollbar-track {
     @apply bg-transparent;
   }
+
+  /* Kanban scroll with more visible scrollbar */
+  .kanban-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--primary) / 0.5) hsl(var(--muted));
+  }
+
+  .kanban-scroll::-webkit-scrollbar {
+    height: 12px;
+  }
+
+  .kanban-scroll::-webkit-scrollbar-track {
+    background: hsl(var(--muted));
+    border-radius: 6px;
+    margin-left: 4px;
+    margin-right: 4px;
+  }
+
+  .kanban-scroll::-webkit-scrollbar-thumb {
+    background: hsl(var(--primary) / 0.5);
+    border-radius: 6px;
+    border: 2px solid hsl(var(--muted));
+  }
+
+  .kanban-scroll::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary) / 0.7);
+  }
 }
 
 /* React Big Calendar Styles */

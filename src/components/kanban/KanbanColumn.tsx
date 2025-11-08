@@ -27,7 +27,7 @@ export function KanbanColumn({ etapa, leads, onLeadClick }: KanbanColumnProps) {
     : 0;
 
   return (
-    <div ref={setNodeRef} className="flex-shrink-0 w-[280px]">
+    <div ref={setNodeRef} className="flex-shrink-0 w-[240px]">
       <Card className={`h-full transition-all ${isOver ? 'ring-2 ring-primary shadow-lg' : ''}`}>
         <div className="px-3 py-3 border-b">
           <div className="flex items-center justify-between mb-1.5">

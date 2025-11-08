@@ -134,97 +134,95 @@ export default function Kanban() {
 
   return (
     <div className="space-y-3">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold mb-3">Funil de Vendas</h1>
-          
-          <div className="flex items-center gap-2 flex-wrap">
-            <div className="flex items-center gap-2">
-              <Button
-                variant={filters.temperatura === 'all' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setFilters({ ...filters, temperatura: 'all' })}
-              >
-                Todos
-              </Button>
-              <Button
-                variant={filters.temperatura === 'hot' ? 'destructive' : 'outline'}
-                size="sm"
-                onClick={() => setFilters({ ...filters, temperatura: 'hot' })}
-                className="gap-1.5"
-              >
-                <Flame className="w-3.5 h-3.5" />
-                Quente
-              </Button>
-              <Button
-                variant={filters.temperatura === 'warm' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setFilters({ ...filters, temperatura: 'warm' })}
-                className="gap-1.5"
-              >
-                <Sun className="w-3.5 h-3.5" />
-                Morno
-              </Button>
-              <Button
-                variant={filters.temperatura === 'cold' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setFilters({ ...filters, temperatura: 'cold' })}
-                className="gap-1.5"
-              >
-                <Snowflake className="w-3.5 h-3.5" />
-                Frio
-              </Button>
-            </div>
-
-            <Select
-              value={filters.origem}
-              onValueChange={(value) => setFilters({ ...filters, origem: value })}
+      <div>
+        <h1 className="text-2xl font-bold mb-3">Funil de Vendas</h1>
+        
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-2">
+            <Button
+              variant={filters.temperatura === 'all' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setFilters({ ...filters, temperatura: 'all' })}
             >
-              <SelectTrigger className="w-[140px] h-9">
-                <SelectValue placeholder="Origem" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas origens</SelectItem>
-                {origens.map((origem) => (
-                  <SelectItem key={origem} value={origem}>
-                    {origem}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              Todos
+            </Button>
+            <Button
+              variant={filters.temperatura === 'hot' ? 'destructive' : 'outline'}
+              size="sm"
+              onClick={() => setFilters({ ...filters, temperatura: 'hot' })}
+              className="gap-1.5"
+            >
+              <Flame className="w-3.5 h-3.5" />
+              Quente
+            </Button>
+            <Button
+              variant={filters.temperatura === 'warm' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setFilters({ ...filters, temperatura: 'warm' })}
+              className="gap-1.5"
+            >
+              <Sun className="w-3.5 h-3.5" />
+              Morno
+            </Button>
+            <Button
+              variant={filters.temperatura === 'cold' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setFilters({ ...filters, temperatura: 'cold' })}
+              className="gap-1.5"
+            >
+              <Snowflake className="w-3.5 h-3.5" />
+              Frio
+            </Button>
+          </div>
 
-            {activeFiltersCount > 0 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={clearFilters}
-                className="gap-1.5"
-              >
-                <X className="w-3.5 h-3.5" />
-                Limpar
-              </Button>
-            )}
+          <Select
+            value={filters.origem}
+            onValueChange={(value) => setFilters({ ...filters, origem: value })}
+          >
+            <SelectTrigger className="w-[140px] h-9">
+              <SelectValue placeholder="Origem" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas origens</SelectItem>
+              {origens.map((origem) => (
+                <SelectItem key={origem} value={origem}>
+                  {origem}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
+          <Button 
+            className="gap-2 bg-primary hover:bg-primary/90 h-9"
+            onClick={() => setQuickFormOpen(true)}
+          >
+            <Users className="w-4 h-4" />
+            Novo Atendimento
+          </Button>
+
+          {activeFiltersCount > 0 && (
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => syncLeads.mutate()}
-              disabled={syncLeads.isPending}
+              onClick={clearFilters}
               className="gap-1.5"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${syncLeads.isPending ? 'animate-spin' : ''}`} />
-              Sincronizar
+              <X className="w-3.5 h-3.5" />
+              Limpar
             </Button>
-          </div>
-        </div>
+          )}
 
-        <Button 
-          className="gap-2 bg-primary hover:bg-primary/90 h-9"
-          onClick={() => setQuickFormOpen(true)}
-        >
-          <Users className="w-4 h-4" />
-          Novo Atendimento
-        </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => syncLeads.mutate()}
+            disabled={syncLeads.isPending}
+            className="gap-1.5"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${syncLeads.isPending ? 'animate-spin' : ''}`} />
+            Sincronizar
+          </Button>
+        </div>
       </div>
 
 
@@ -234,7 +232,7 @@ export default function Kanban() {
         onDragEnd={handleDragEnd}
         onDragCancel={handleDragCancel}
       >
-        <div className="flex gap-2.5 overflow-x-auto pb-3 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
+        <div className="flex gap-2.5 overflow-x-auto pb-3 kanban-scroll">
           {etapas?.map((etapa) => {
             const leadsNaEtapa = filteredLeadsFunil?.filter(
               (lf: LeadFunil) => lf.etapa_id === etapa.id
