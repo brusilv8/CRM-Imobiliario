@@ -36,8 +36,8 @@ export default function Proposals() {
 
   const filteredPropostas = propostas?.filter((proposta) => {
     const matchesSearch =
-      proposta.codigo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      proposta.lead?.nome.toLowerCase().includes(searchTerm.toLowerCase());
+      proposta.codigo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      proposta.lead?.nome?.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesStatus = statusFilter === 'all' || proposta.status === statusFilter;
     
@@ -106,25 +106,25 @@ export default function Proposals() {
             <TableBody>
               {filteredPropostas && filteredPropostas.length > 0 ? (
                 filteredPropostas.map((proposta) => {
-                  const statusInfo = statusConfig[proposta.status];
+                  const statusInfo = statusConfig[proposta.status as keyof typeof statusConfig] || statusConfig.enviada;
                   return (
                     <TableRow key={proposta.id}>
-                      <TableCell className="font-medium">{proposta.codigo}</TableCell>
-                      <TableCell>{proposta.lead?.nome}</TableCell>
+                      <TableCell className="font-medium">{proposta.codigo || 'N/A'}</TableCell>
+                      <TableCell>{proposta.lead?.nome || 'N/A'}</TableCell>
                       <TableCell>
-                        {proposta.imovel?.tipo} - {proposta.imovel?.endereco}
+                        {proposta.imovel?.tipo || 'N/A'} - {proposta.imovel?.endereco || 'N/A'}
                       </TableCell>
                       <TableCell>
-                        {proposta.valor.toLocaleString('pt-BR', {
+                        {proposta.valor?.toLocaleString('pt-BR', {
                           style: 'currency',
                           currency: 'BRL',
-                        })}
+                        }) || 'R$ 0,00'}
                       </TableCell>
                       <TableCell>
                         <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>
                       </TableCell>
                       <TableCell>
-                        {format(new Date(proposta.validade), 'dd/MM/yyyy', { locale: ptBR })}
+                        {proposta.validade ? format(new Date(proposta.validade), 'dd/MM/yyyy', { locale: ptBR }) : 'N/A'}
                       </TableCell>
                       <TableCell>
                         <Button
