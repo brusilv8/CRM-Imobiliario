@@ -23,7 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { RefreshCw, Filter, X, Flame, Sun, Snowflake } from "lucide-react";
+import { RefreshCw, Filter, X, Flame, Sun, Snowflake, Users } from "lucide-react";
 import type { Lead, LeadFunil } from "@/types/database.types";
 
 export default function Kanban() {
@@ -132,98 +132,64 @@ export default function Kanban() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold mb-1">Pipeline de Vendas</h1>
-          <p className="text-sm text-muted-foreground">
-            Arraste os cards para mover leads entre as etapas
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowFilters(!showFilters)}
-            className="gap-2"
-          >
-            <Filter className="w-4 h-4" />
-            Filtros
-            {activeFiltersCount > 0 && (
-              <Badge variant="secondary" className="ml-1 px-1.5 py-0 text-xs">
-                {activeFiltersCount}
-              </Badge>
-            )}
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => syncLeads.mutate()}
-            disabled={syncLeads.isPending}
-            className="gap-2"
-          >
-            <RefreshCw className={`w-4 h-4 ${syncLeads.isPending ? 'animate-spin' : ''}`} />
-            Sincronizar
-          </Button>
-        </div>
-      </div>
-
-      {showFilters && (
-        <Card className="p-4">
-          <div className="flex items-center gap-4 flex-wrap">
-            <div className="flex-1 min-w-[200px]">
-              <Select
-                value={filters.temperatura}
-                onValueChange={(value) =>
-                  setFilters({ ...filters, temperatura: value })
-                }
+      <div className="flex items-start justify-between">
+        <div className="flex-1">
+          <h1 className="text-3xl font-bold mb-4">Funil de Vendas</h1>
+          
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex items-center gap-2">
+              <Button
+                variant={filters.temperatura === 'all' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilters({ ...filters, temperatura: 'all' })}
               >
-                <SelectTrigger className="h-9">
-                  <SelectValue placeholder="Temperatura" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todas temperaturas</SelectItem>
-                  <SelectItem value="hot">
-                    <div className="flex items-center gap-2">
-                      <Flame className="w-4 h-4 text-destructive" />
-                      Quente
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="warm">
-                    <div className="flex items-center gap-2">
-                      <Sun className="w-4 h-4 text-warning" />
-                      Morno
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="cold">
-                    <div className="flex items-center gap-2">
-                      <Snowflake className="w-4 h-4 text-primary" />
-                      Frio
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+                Todos
+              </Button>
+              <Button
+                variant={filters.temperatura === 'hot' ? 'destructive' : 'outline'}
+                size="sm"
+                onClick={() => setFilters({ ...filters, temperatura: 'hot' })}
+                className="gap-2"
+              >
+                <Flame className="w-4 h-4" />
+                Quente
+              </Button>
+              <Button
+                variant={filters.temperatura === 'warm' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilters({ ...filters, temperatura: 'warm' })}
+                className="gap-2"
+              >
+                <Sun className="w-4 h-4" />
+                Morno
+              </Button>
+              <Button
+                variant={filters.temperatura === 'cold' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilters({ ...filters, temperatura: 'cold' })}
+                className="gap-2"
+              >
+                <Snowflake className="w-4 h-4" />
+                Frio
+              </Button>
             </div>
 
-            <div className="flex-1 min-w-[200px]">
-              <Select
-                value={filters.origem}
-                onValueChange={(value) =>
-                  setFilters({ ...filters, origem: value })
-                }
-              >
-                <SelectTrigger className="h-9">
-                  <SelectValue placeholder="Origem" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todas origens</SelectItem>
-                  {origens.map((origem) => (
-                    <SelectItem key={origem} value={origem}>
-                      {origem}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <Select
+              value={filters.origem}
+              onValueChange={(value) => setFilters({ ...filters, origem: value })}
+            >
+              <SelectTrigger className="w-[160px] h-9">
+                <SelectValue placeholder="Origem" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas origens</SelectItem>
+                {origens.map((origem) => (
+                  <SelectItem key={origem} value={origem}>
+                    {origem}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
             {activeFiltersCount > 0 && (
               <Button
@@ -233,12 +199,29 @@ export default function Kanban() {
                 className="gap-2"
               >
                 <X className="w-4 h-4" />
-                Limpar filtros
+                Limpar
               </Button>
             )}
+
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => syncLeads.mutate()}
+              disabled={syncLeads.isPending}
+              className="gap-2"
+            >
+              <RefreshCw className={`w-4 h-4 ${syncLeads.isPending ? 'animate-spin' : ''}`} />
+              Sincronizar
+            </Button>
           </div>
-        </Card>
-      )}
+        </div>
+
+        <Button className="gap-2 bg-primary hover:bg-primary/90">
+          <Users className="w-4 h-4" />
+          Novo Atendimento
+        </Button>
+      </div>
+
 
       <DndContext
         sensors={sensors}

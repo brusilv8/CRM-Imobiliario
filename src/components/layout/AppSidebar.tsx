@@ -24,7 +24,7 @@ import {
 const menuItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Leads", url: "/leads", icon: Users },
-  { title: "Pipeline", url: "/kanban", icon: BarChart3 },
+  { title: "Funil de Vendas", url: "/kanban", icon: BarChart3 },
   { title: "Imóveis", url: "/properties", icon: Home },
   { title: "Agenda", url: "/calendar", icon: Calendar },
   { title: "Propostas", url: "/proposals", icon: FileText },

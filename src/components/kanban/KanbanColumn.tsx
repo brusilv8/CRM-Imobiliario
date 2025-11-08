@@ -27,28 +27,37 @@ export function KanbanColumn({ etapa, leads, onLeadClick }: KanbanColumnProps) {
     : 0;
 
   return (
-    <div ref={setNodeRef} className="flex-shrink-0 w-72">
-      <Card className={`p-3 h-full transition-colors ${isOver ? 'bg-muted/50' : ''}`}>
-        <div className="space-y-2 mb-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+    <div ref={setNodeRef} className="flex-shrink-0 w-80">
+      <Card className={`h-full transition-all ${isOver ? 'ring-2 ring-primary shadow-lg' : 'shadow-sm'}`}>
+        <div className="p-4 border-b bg-muted/30">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-3">
               <div
-                className="w-2 h-2 rounded-full"
+                className="w-3 h-3 rounded-full shadow-sm"
                 style={{ backgroundColor: etapa.cor }}
               />
-              <h3 className="font-semibold text-sm">{etapa.nome}</h3>
+              <h3 className="font-bold text-base">{etapa.nome}</h3>
             </div>
-            <Badge variant="secondary" className="text-xs">{leads.length}</Badge>
+            <Badge 
+              className="text-sm font-semibold px-2.5 py-1"
+              style={{ 
+                backgroundColor: `${etapa.cor}20`,
+                color: etapa.cor,
+                border: `1px solid ${etapa.cor}40`
+              }}
+            >
+              {leads.length}
+            </Badge>
           </div>
           
           {leads.length > 0 && (
-            <div className="text-xs text-muted-foreground">
+            <div className="text-xs text-muted-foreground font-medium">
               ⌀ {tempoMedio} {tempoMedio === 1 ? 'dia' : 'dias'} nesta etapa
             </div>
           )}
         </div>
 
-        <div className="space-y-2 max-h-[calc(100vh-280px)] overflow-y-auto pr-1">
+        <div className="p-3 space-y-3 max-h-[calc(100vh-320px)] overflow-y-auto">
           {leads.map((leadFunil) => (
             <LeadCard
               key={leadFunil.id}
@@ -59,8 +68,9 @@ export function KanbanColumn({ etapa, leads, onLeadClick }: KanbanColumnProps) {
           ))}
 
           {leads.length === 0 && (
-            <div className="text-center py-6 text-muted-foreground text-xs">
-              Nenhum lead
+            <div className="text-center py-12 text-muted-foreground text-sm">
+              <div className="mb-2 opacity-50">📋</div>
+              Nenhum lead nesta etapa
             </div>
           )}
         </div>
