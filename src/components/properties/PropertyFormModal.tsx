@@ -395,7 +395,14 @@ export function PropertyFormModal({ open, onOpenChange }: PropertyFormModalProps
                 Próximo
               </Button>
             ) : (
-              <Button type="submit" disabled={createImovel.isPending}>
+              <Button 
+                type="button"
+                onClick={() => {
+                  console.log('🔵 BOTÃO CLICADO!');
+                  handleSubmit(onSubmit)();
+                }}
+                disabled={createImovel.isPending}
+              >
                 {createImovel.isPending ? "Cadastrando..." : "Cadastrar Imóvel"}
               </Button>
             )}
