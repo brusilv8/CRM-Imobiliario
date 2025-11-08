@@ -26,7 +26,7 @@ const leadSchema = z.object({
   telefone: z.string().min(10, 'Telefone inválido'),
   email: z.string().email('Email inválido').optional().or(z.literal('')),
   origem: z.string().min(1, 'Selecione a origem'),
-  temperatura: z.enum(['cold', 'warm', 'hot']),
+  temperatura: z.enum(['cold', 'warm', 'hot'], { required_error: 'Selecione a temperatura' }),
   orcamento_min: z.coerce.number().optional(),
   orcamento_max: z.coerce.number().optional(),
   interesse: z.string().optional(),
@@ -46,6 +46,7 @@ export function LeadFormModal({ open, onOpenChange }: LeadFormModalProps) {
   const form = useForm<LeadFormData>({
     resolver: zodResolver(leadSchema),
     defaultValues: {
+      origem: '',
       temperatura: 'warm',
     },
   });
@@ -110,18 +111,22 @@ export function LeadFormModal({ open, onOpenChange }: LeadFormModalProps) {
 
             <div className="space-y-2">
               <Label htmlFor="origem">Origem *</Label>
-              <Select onValueChange={(value) => form.setValue('origem', value)}>
+              <Select 
+                value={form.watch('origem')} 
+                onValueChange={(value) => form.setValue('origem', value, { shouldValidate: true })}
+              >
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecione" />
+                  <SelectValue placeholder="Selecione uma origem" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Site">Site</SelectItem>
-                  <SelectItem value="Portal Imobiliário">Portal Imobiliário</SelectItem>
-                  <SelectItem value="Indicação">Indicação</SelectItem>
-                  <SelectItem value="Facebook Ads">Facebook Ads</SelectItem>
-                  <SelectItem value="Instagram">Instagram</SelectItem>
-                  <SelectItem value="WhatsApp">WhatsApp</SelectItem>
-                  <SelectItem value="Outro">Outro</SelectItem>
+                  <SelectItem value="site">Site</SelectItem>
+                  <SelectItem value="portal">Portal Imobiliário</SelectItem>
+                  <SelectItem value="indicacao">Indicação</SelectItem>
+                  <SelectItem value="redes_sociais">Redes Sociais</SelectItem>
+                  <SelectItem value="telefone">Telefone</SelectItem>
+                  <SelectItem value="email">E-mail</SelectItem>
+                  <SelectItem value="imovel">Imóvel</SelectItem>
+                  <SelectItem value="outros">Outros</SelectItem>
                 </SelectContent>
               </Select>
               {form.formState.errors.origem && (
