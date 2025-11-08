@@ -27,8 +27,28 @@ export function useUsuario(userId?: string) {
       const { data, error } = await supabase
         .from('usuarios')
         .select('*')
-        .eq('auth_id', userId)
-        .single();
+        .eq('auth_user_id', userId)
+        .maybeSingle();
+
+      // Se não encontrar usuário, tentar criar
+      if (!data && !error) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: newUser, error: insertError } = await supabase
+            .from('usuarios')
+            .insert({
+              auth_user_id: user.id,
+              email: user.email,
+              nome: user.email?.split('@')[0] || 'Usuário',
+              ativo: true,
+            })
+            .select()
+            .single();
+          
+          if (insertError) throw insertError;
+          return newUser as Usuario;
+        }
+      }
 
       if (error) throw error;
       return data as Usuario;

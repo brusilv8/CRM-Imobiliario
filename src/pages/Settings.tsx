@@ -28,15 +28,15 @@ export default function Settings() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="profile">
+        <TabsContent value="profile" className="space-y-4">
           <ProfileSettings />
         </TabsContent>
 
-        <TabsContent value="team">
+        <TabsContent value="team" className="space-y-4">
           <TeamManagement />
         </TabsContent>
 
-        <TabsContent value="preferences">
+        <TabsContent value="preferences" className="space-y-4">
           <PreferencesSettings />
         </TabsContent>
       </Tabs>
