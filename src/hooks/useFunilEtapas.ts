@@ -86,3 +86,68 @@ export function useUpdateLeadEtapa() {
     },
   });
 }
+
+export function useSyncLeadsToFunil() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      // Get all leads
+      const { data: leads, error: leadsError } = await supabase
+        .from('leads')
+        .select('id');
+
+      if (leadsError) throw leadsError;
+
+      // Get all leads already in funnel
+      const { data: leadsFunil, error: funilError } = await supabase
+        .from('lead_funil')
+        .select('lead_id');
+
+      if (funilError) throw funilError;
+
+      const leadIdsInFunil = new Set(leadsFunil?.map((lf) => lf.lead_id) || []);
+      const leadsToAdd = leads?.filter((lead) => !leadIdsInFunil.has(lead.id)) || [];
+
+      if (leadsToAdd.length === 0) {
+        return { synced: 0 };
+      }
+
+      // Get first funnel stage
+      const { data: etapa, error: etapaError } = await supabase
+        .from('funil_etapas')
+        .select('id')
+        .order('ordem', { ascending: true })
+        .limit(1)
+        .single();
+
+      if (etapaError) throw etapaError;
+
+      // Add all leads to first stage
+      const { error: insertError } = await supabase
+        .from('lead_funil')
+        .insert(
+          leadsToAdd.map((lead) => ({
+            lead_id: lead.id,
+            etapa_id: etapa.id,
+            data_entrada: new Date().toISOString()
+          }))
+        );
+
+      if (insertError) throw insertError;
+
+      return { synced: leadsToAdd.length };
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['leads_funil'] });
+      if (data.synced > 0) {
+        toast.success(`${data.synced} lead(s) sincronizado(s) com sucesso!`);
+      } else {
+        toast.info('Todos os leads já estão no funil');
+      }
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Erro ao sincronizar leads');
+    },
+  });
+}

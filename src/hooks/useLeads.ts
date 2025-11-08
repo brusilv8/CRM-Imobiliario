@@ -47,34 +47,41 @@ export function useCreateLead() {
         .single();
 
       if (error) throw error;
-      return data as Lead;
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['leads'] });
-      toast.success('Lead criado com sucesso!');
-      
+
+      // Get first funnel stage
+      const { data: etapa, error: etapaError } = await supabase
+        .from('funil_etapas')
+        .select('id')
+        .order('ordem', { ascending: true })
+        .limit(1)
+        .single();
+
+      if (etapaError) throw etapaError;
+
+      // Add to first funnel stage
+      const { error: funilError } = await supabase
+        .from('lead_funil')
+        .insert({
+          lead_id: data.id,
+          etapa_id: etapa.id,
+          data_entrada: new Date().toISOString()
+        });
+
+      if (funilError) throw funilError;
+
       // Create initial interaction
-      supabase.from('lead_interacoes').insert({
+      await supabase.from('lead_interacoes').insert({
         lead_id: data.id,
         tipo: 'observacao',
         descricao: 'Lead criado no sistema'
       });
 
-      // Add to first funnel stage
-      supabase.from('funil_etapas')
-        .select('id')
-        .order('ordem', { ascending: true })
-        .limit(1)
-        .single()
-        .then(({ data: etapa }) => {
-          if (etapa) {
-            supabase.from('lead_funil').insert({
-              lead_id: data.id,
-              etapa_id: etapa.id,
-              data_entrada: new Date().toISOString()
-            });
-          }
-        });
+      return data as Lead;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['leads'] });
+      queryClient.invalidateQueries({ queryKey: ['leads_funil'] });
+      toast.success('Lead criado com sucesso!');
     },
     onError: (error: any) => {
       toast.error(error.message || 'Erro ao criar lead');

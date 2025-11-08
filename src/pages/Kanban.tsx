@@ -8,10 +8,12 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import { useFunilEtapas, useLeadsFunil, useUpdateLeadEtapa } from "@/hooks/useFunilEtapas";
+import { useFunilEtapas, useLeadsFunil, useUpdateLeadEtapa, useSyncLeadsToFunil } from "@/hooks/useFunilEtapas";
 import { KanbanColumn } from "@/components/kanban/KanbanColumn";
 import { LeadCard } from "@/components/kanban/LeadCard";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { RefreshCw } from "lucide-react";
 import type { Lead, LeadFunil } from "@/types/database.types";
 
 export default function Kanban() {
@@ -19,6 +21,7 @@ export default function Kanban() {
   const { data: etapas, isLoading: etapasLoading } = useFunilEtapas();
   const { data: leadsFunil, isLoading: leadsFunilLoading } = useLeadsFunil();
   const updateLeadEtapa = useUpdateLeadEtapa();
+  const syncLeads = useSyncLeadsToFunil();
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -36,10 +39,14 @@ export default function Kanban() {
     const { active, over } = event;
     setActiveId(null);
 
-    if (!over || active.id === over.id) return;
+    if (!over) return;
 
     const leadId = active.id as string;
     const newEtapaId = over.id as string;
+
+    // Check if lead is already in this stage
+    const currentLeadFunil = leadsFunil?.find((lf: LeadFunil) => lf.lead_id === leadId);
+    if (currentLeadFunil?.etapa_id === newEtapaId) return;
 
     updateLeadEtapa.mutate({ leadId, etapaId: newEtapaId });
   };
@@ -72,11 +79,22 @@ export default function Kanban() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold mb-2">Pipeline de Vendas</h1>
-        <p className="text-muted-foreground">
-          Arraste os cards para mover leads entre as etapas
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">Pipeline de Vendas</h1>
+          <p className="text-muted-foreground">
+            Arraste os cards para mover leads entre as etapas
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          onClick={() => syncLeads.mutate()}
+          disabled={syncLeads.isPending}
+          className="gap-2"
+        >
+          <RefreshCw className={`w-4 h-4 ${syncLeads.isPending ? 'animate-spin' : ''}`} />
+          Sincronizar Leads
+        </Button>
       </div>
 
       <DndContext
