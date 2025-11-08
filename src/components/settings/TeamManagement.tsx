@@ -99,6 +99,19 @@ export function TeamManagement() {
                     const role = usuario.role || 'assistente';
                     const roleInfo = roleConfig[role as keyof typeof roleConfig];
                     const RoleIcon = roleInfo.icon;
+                    
+                    // Validações de segurança para todos os campos
+                    const nomeUsuario = typeof usuario.nome === 'string' && usuario.nome.trim() !== '' 
+                      ? usuario.nome 
+                      : 'Usuário';
+                    const emailUsuario = typeof usuario.email === 'string' ? usuario.email : '-';
+                    const telefoneUsuario = typeof usuario.telefone === 'string' && usuario.telefone.trim() !== '' 
+                      ? usuario.telefone 
+                      : null;
+                    const cargoUsuario = typeof usuario.cargo === 'string' && usuario.cargo.trim() !== '' 
+                      ? usuario.cargo 
+                      : '-';
+                    const iniciais = nomeUsuario.substring(0, 2).toUpperCase();
 
                     return (
                       <TableRow key={usuario.id}>
@@ -106,19 +119,19 @@ export function TeamManagement() {
                           <div className="flex items-center gap-3">
                             <Avatar>
                               <AvatarFallback>
-                                {usuario.nome.substring(0, 2).toUpperCase()}
+                                {iniciais}
                               </AvatarFallback>
                             </Avatar>
                             <div>
-                              <p className="font-medium">{usuario.nome}</p>
-                              {usuario.telefone && (
-                                <p className="text-sm text-muted-foreground">{usuario.telefone}</p>
+                              <p className="font-medium">{nomeUsuario}</p>
+                              {telefoneUsuario && (
+                                <p className="text-sm text-muted-foreground">{telefoneUsuario}</p>
                               )}
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell>{usuario.email}</TableCell>
-                        <TableCell>{usuario.cargo || '-'}</TableCell>
+                        <TableCell>{emailUsuario}</TableCell>
+                        <TableCell>{cargoUsuario}</TableCell>
                         <TableCell>
                           <Badge variant={roleInfo.variant} className="gap-1">
                             <RoleIcon className={`w-3 h-3 ${roleInfo.color}`} />
