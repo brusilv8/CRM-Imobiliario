@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   Table,
   TableBody,
@@ -126,6 +126,7 @@ export function TeamManagement() {
                         <TableCell>
                           <div className="flex items-center gap-3">
                             <Avatar>
+                              <AvatarImage src={usuario.avatar_url || undefined} alt={nomeUsuario} />
                               <AvatarFallback>
                                 {iniciais}
                               </AvatarFallback>
