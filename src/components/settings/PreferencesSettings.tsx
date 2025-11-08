@@ -13,21 +13,25 @@ import { supabase } from '@/lib/supabase';
 export function PreferencesSettings() {
   const { signOut } = useAuth();
   const navigate = useNavigate();
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
-  const [emailNotifications, setEmailNotifications] = useState(true);
-  const [pushNotifications, setPushNotifications] = useState(false);
+  
+  // Inicializar estados lendo diretamente do localStorage
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    const savedTheme = localStorage.getItem('theme');
+    return (savedTheme as 'light' | 'dark') || 'light';
+  });
+  
+  const [emailNotifications, setEmailNotifications] = useState(() => {
+    return localStorage.getItem('emailNotifications') === 'true';
+  });
+  
+  const [pushNotifications, setPushNotifications] = useState(() => {
+    return localStorage.getItem('pushNotifications') === 'true';
+  });
 
+  // Aplicar tema ao montar componente
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' || 'light';
-    const savedEmail = localStorage.getItem('emailNotifications') === 'true';
-    const savedPush = localStorage.getItem('pushNotifications') === 'true';
-    
-    setTheme(savedTheme);
-    setEmailNotifications(savedEmail);
-    setPushNotifications(savedPush);
-    
-    document.documentElement.classList.toggle('dark', savedTheme === 'dark');
-  }, []);
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+  }, [theme]);
 
   const handleThemeToggle = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
