@@ -101,7 +101,7 @@ export function useRecentActivities() {
         .select(`
           *,
           lead:leads(nome),
-          usuario:usuarios(nome)
+          usuario:usuarios(nome_completo)
         `)
         .order('created_at', { ascending: false })
         .limit(10);

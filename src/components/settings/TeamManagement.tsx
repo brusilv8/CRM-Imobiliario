@@ -100,8 +100,8 @@ export function TeamManagement() {
                     const RoleIcon = roleInfo.icon;
                     
                     // Validações de segurança para todos os campos
-                    const nomeUsuario = typeof usuario.nome === 'string' && usuario.nome.trim() !== '' 
-                      ? usuario.nome 
+                    const nomeUsuario = typeof usuario.nome_completo === 'string' && usuario.nome_completo.trim() !== '' 
+                      ? usuario.nome_completo 
                       : 'Usuário';
                     const emailUsuario = typeof usuario.email === 'string' ? usuario.email : '-';
                     const telefoneUsuario = typeof usuario.telefone === 'string' && usuario.telefone.trim() !== '' 

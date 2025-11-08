@@ -39,7 +39,7 @@ export function useUsuario(userId?: string) {
             .insert({
               auth_user_id: user.id,
               email: user.email,
-              nome: user.email?.split('@')[0] || 'Usuário',
+              nome_completo: user.email?.split('@')[0] || 'Usuário',
               ativo: true,
             })
             .select()

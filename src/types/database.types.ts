@@ -161,7 +161,7 @@ export interface Proposta {
 export interface Usuario {
   id: string;
   auth_id: string;
-  nome: string;
+  nome_completo: string;
   email: string;
   telefone?: string;
   avatar_url?: string;

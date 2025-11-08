@@ -16,7 +16,7 @@ import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 
 const profileSchema = z.object({
-  nome: z.string().min(3, 'Nome deve ter no mínimo 3 caracteres'),
+  nome_completo: z.string().min(3, 'Nome deve ter no mínimo 3 caracteres'),
   telefone: z.string().optional(),
   cargo: z.string().optional(),
 });
@@ -44,7 +44,7 @@ export function ProfileSettings() {
   const form = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
     values: {
-      nome: usuario?.nome || '',
+      nome_completo: usuario?.nome_completo || '',
       telefone: usuario?.telefone || '',
       cargo: usuario?.cargo || '',
     },
@@ -182,7 +182,7 @@ export function ProfileSettings() {
               <Avatar className="w-20 h-20">
                 <AvatarImage src={avatarUrl || usuario?.avatar_url} />
                 <AvatarFallback className="text-2xl">
-                  {usuario?.nome?.substring(0, 2).toUpperCase() || 'US'}
+                  {usuario?.nome_completo?.substring(0, 2).toUpperCase() || 'US'}
                 </AvatarFallback>
               </Avatar>
               <Button
@@ -203,7 +203,7 @@ export function ProfileSettings() {
               />
             </div>
             <div>
-              <p className="font-semibold">{usuario?.nome}</p>
+              <p className="font-semibold">{usuario?.nome_completo}</p>
               <p className="text-sm text-muted-foreground">{usuario?.email}</p>
               <p className="text-xs text-muted-foreground mt-1">
                 Clique no ícone para alterar a foto
@@ -215,7 +215,7 @@ export function ProfileSettings() {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
-              name="nome"
+              name="nome_completo"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Nome Completo</FormLabel>
