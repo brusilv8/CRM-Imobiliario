@@ -66,6 +66,12 @@ export function ProposalFormModal({ open, onOpenChange }: ProposalFormModalProps
       : 0;
 
   const onSubmit = async (data: ProposalFormData) => {
+    // Só permite criar proposta se estiver na etapa final
+    if (step !== 3) {
+      nextStep();
+      return;
+    }
+
     await createProposta.mutateAsync({
       lead_id: data.lead_id,
       imovel_id: data.imovel_id,
