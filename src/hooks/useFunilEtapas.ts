@@ -69,6 +69,31 @@ export function useUpdateLeadEtapa() {
         descricao: 'Lead movido no funil'
       });
 
+      // Register system activity
+      const { data: lead } = await supabase
+        .from('leads')
+        .select('nome')
+        .eq('id', leadId)
+        .single();
+
+      const { data: novaEtapa } = await supabase
+        .from('funil_etapas')
+        .select('nome')
+        .eq('id', etapaId)
+        .single();
+
+      if (novaEtapa) {
+        await supabase.from('atividades_sistema').insert({
+          tipo: 'etapa_alterada',
+          titulo: `${lead?.nome || 'Lead'} movido para ${novaEtapa.nome}`,
+          descricao: `Lead avançou no funil de vendas`,
+          lead_id: leadId,
+          metadata: { 
+            etapa_nova: novaEtapa.nome 
+          }
+        });
+      }
+
       // Update last contact
       await supabase
         .from('leads')

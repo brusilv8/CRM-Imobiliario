@@ -171,6 +171,20 @@ export function useFinalizarLead() {
         descricao: 'Lead marcado como finalizado e convertido em cliente',
       });
 
+      // Register system activity
+      const { data: lead } = await supabase
+        .from('leads')
+        .select('nome')
+        .eq('id', id)
+        .single();
+
+      await supabase.from('atividades_sistema').insert({
+        tipo: 'lead_finalizado',
+        titulo: `Lead ${lead?.nome} foi finalizado`,
+        descricao: 'Lead removido do funil e propostas arquivadas',
+        lead_id: id,
+      });
+
       return data as Lead;
     },
     onSuccess: () => {
@@ -223,6 +237,20 @@ export function useReativarLead() {
         lead_id: id,
         tipo: 'observacao',
         descricao: 'Cliente reativado no funil de vendas',
+      });
+
+      // Register system activity
+      const { data: lead } = await supabase
+        .from('leads')
+        .select('nome')
+        .eq('id', id)
+        .single();
+
+      await supabase.from('atividades_sistema').insert({
+        tipo: 'lead_reativado',
+        titulo: `Lead ${lead?.nome} foi reativado`,
+        descricao: 'Lead retornou ao funil na primeira etapa',
+        lead_id: id,
       });
 
       return data as Lead;

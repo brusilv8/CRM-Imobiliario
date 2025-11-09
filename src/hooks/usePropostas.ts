@@ -38,6 +38,13 @@ export function useCreateProposta() {
 
       if (error) throw error;
 
+      // Get lead name for activity
+      const { data: lead } = await supabase
+        .from('leads')
+        .select('nome')
+        .eq('id', proposta.lead_id)
+        .single();
+
       // Create interaction
       await supabase.from('lead_interacoes').insert({
         lead_id: proposta.lead_id,
@@ -45,10 +52,21 @@ export function useCreateProposta() {
         descricao: `Proposta ${codigo} criada no valor de ${proposta.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`
       });
 
+      // Register system activity
+      await supabase.from('atividades_sistema').insert({
+        tipo: 'proposta_criada',
+        titulo: `Nova proposta ${codigo} criada`,
+        descricao: lead?.nome ? `Lead: ${lead.nome} - Valor: ${proposta.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}` : undefined,
+        proposta_id: data.id,
+        lead_id: proposta.lead_id,
+      });
+
       return data as Proposta;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['propostas'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
+      queryClient.invalidateQueries({ queryKey: ['atividades-sistema'] });
       toast.success('Proposta criada com sucesso!');
     },
     onError: (error: any) => {
@@ -109,6 +127,13 @@ export function useUpdatePropostaStatus() {
 
   return useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      // Get proposta details first
+      const { data: proposta } = await supabase
+        .from('propostas')
+        .select('*, lead:leads(nome)')
+        .eq('id', id)
+        .single();
+
       const { data, error } = await supabase
         .from('propostas')
         .update({ status, updated_at: new Date().toISOString() })
@@ -117,10 +142,23 @@ export function useUpdatePropostaStatus() {
         .single();
 
       if (error) throw error;
+
+      // Register system activity for status change
+      await supabase.from('atividades_sistema').insert({
+        tipo: 'proposta_status_alterado',
+        titulo: `Proposta ${proposta?.codigo} mudou para ${status}`,
+        descricao: proposta?.lead?.nome ? `Lead: ${proposta.lead.nome}` : undefined,
+        proposta_id: id,
+        lead_id: proposta?.lead_id,
+        metadata: { status_novo: status }
+      });
+
       return data as Proposta;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['propostas'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
+      queryClient.invalidateQueries({ queryKey: ['atividades-sistema'] });
       toast.success('Status atualizado com sucesso!');
     },
     onError: (error: any) => {

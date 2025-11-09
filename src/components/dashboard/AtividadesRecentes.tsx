@@ -20,33 +20,49 @@ import { ptBR } from "date-fns/locale";
 
 const iconMap: Record<string, React.ComponentType<any>> = {
   lead_criado: UserPlus,
+  lead_finalizado: XCircle,
+  lead_reativado: CheckCircle,
   etapa_alterada: TrendingUp,
   visita_agendada: Calendar,
   visita_status_alterado: Clock,
   proposta_enviada: FileText,
+  proposta_criada: FileText,
   proposta_status_alterado: FileText,
+  proposta_finalizada: XCircle,
+  proposta_editada: FileText,
+  proposta_excluida: XCircle,
+  historico_acessado: Clock,
   imovel_criado: Home,
 };
 
 const colorMap: Record<string, string> = {
   lead_criado: "bg-primary/10 text-primary",
+  lead_finalizado: "bg-destructive/10 text-destructive",
+  lead_reativado: "bg-status-qualified/10 text-status-qualified",
   etapa_alterada: "bg-status-qualified/10 text-status-qualified",
   visita_agendada: "bg-warning/10 text-warning",
   visita_status_alterado: "bg-secondary/10 text-secondary",
   proposta_enviada: "bg-status-proposal/10 text-status-proposal",
+  proposta_criada: "bg-status-proposal/10 text-status-proposal",
   proposta_status_alterado: "bg-status-proposal/10 text-status-proposal",
+  proposta_finalizada: "bg-destructive/10 text-destructive",
+  proposta_editada: "bg-secondary/10 text-secondary",
+  proposta_excluida: "bg-destructive/10 text-destructive",
+  historico_acessado: "bg-muted text-muted-foreground",
   imovel_criado: "bg-status-contacted/10 text-status-contacted",
 };
 
 const getBadgeVariant = (tipo: string, metadata?: any): { label: string; variant: "default" | "secondary" | "destructive" | "outline" } => {
   if (tipo === "proposta_status_alterado" && metadata?.status_novo) {
     switch (metadata.status_novo) {
-      case "aprovada":
-        return { label: "Aprovada", variant: "default" };
+      case "aceita":
+        return { label: "Aceita", variant: "default" };
       case "recusada":
         return { label: "Recusada", variant: "destructive" };
       case "em_analise":
         return { label: "Em Análise", variant: "secondary" };
+      case "cancelada":
+        return { label: "Cancelada", variant: "destructive" };
       default:
         return { label: metadata.status_novo, variant: "outline" };
     }
@@ -61,6 +77,18 @@ const getBadgeVariant = (tipo: string, metadata?: any): { label: string; variant
       default:
         return { label: metadata.status_novo, variant: "outline" };
     }
+  }
+
+  if (tipo === "lead_finalizado") {
+    return { label: "Finalizado", variant: "destructive" };
+  }
+
+  if (tipo === "lead_reativado") {
+    return { label: "Reativado", variant: "default" };
+  }
+
+  if (tipo === "proposta_finalizada") {
+    return { label: "Arquivada", variant: "destructive" };
   }
 
   return { label: "", variant: "outline" };
