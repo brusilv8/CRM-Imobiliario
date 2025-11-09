@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -13,10 +13,14 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { format, addDays } from 'date-fns';
-import { CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
+import { CalendarIcon, ChevronLeft, ChevronRight, AlertCircle } from 'lucide-react';
 import { useLeads } from '@/hooks/useLeads';
 import { useImoveis } from '@/hooks/useImoveis';
 import { useCreateProposta } from '@/hooks/usePropostas';
+import { useLeadsFunil } from '@/hooks/useFunilEtapas';
+import { useFunilValidation } from '@/hooks/useFunilValidation';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { toast } from 'sonner';
 
 const proposalSchema = z.object({
   lead_id: z.string().min(1, 'Selecione um lead'),
@@ -41,6 +45,23 @@ export function ProposalFormModal({ open, onOpenChange }: ProposalFormModalProps
   const { data: leads } = useLeads();
   const { data: imoveis } = useImoveis();
   const createProposta = useCreateProposta();
+  const { data: leadsFunil } = useLeadsFunil();
+  const { filterLeadsForProposals, canCreateProposal, getEtapaNome } = useFunilValidation();
+
+  // Filtrar apenas leads elegíveis (Qualificação ou superior)
+  const eligibleLeadsFunil = useMemo(() => {
+    if (!leadsFunil) return [];
+    return filterLeadsForProposals(leadsFunil);
+  }, [leadsFunil, filterLeadsForProposals]);
+
+  const eligibleLeadIds = useMemo(() => {
+    return new Set(eligibleLeadsFunil.map(lf => lf.lead_id));
+  }, [eligibleLeadsFunil]);
+
+  const eligibleLeads = useMemo(() => {
+    if (!leads) return [];
+    return leads.filter(lead => eligibleLeadIds.has(lead.id));
+  }, [leads, eligibleLeadIds]);
 
   const form = useForm<ProposalFormData>({
     resolver: zodResolver(proposalSchema),
@@ -69,6 +90,15 @@ export function ProposalFormModal({ open, onOpenChange }: ProposalFormModalProps
     // Só permite criar proposta se estiver na etapa final
     if (step !== 3) {
       nextStep();
+      return;
+    }
+
+    // Validar etapa do lead antes de criar proposta
+    const leadFunil = leadsFunil?.find(lf => lf.lead_id === data.lead_id);
+    const validation = canCreateProposal(leadFunil || null);
+    
+    if (!validation.valid) {
+      toast.error(validation.message || 'Lead não elegível para proposta');
       return;
     }
 
@@ -114,24 +144,37 @@ export function ProposalFormModal({ open, onOpenChange }: ProposalFormModalProps
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {step === 1 && (
               <div className="space-y-4">
+                {eligibleLeads.length === 0 && (
+                  <Alert>
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      Nenhum lead elegível para criar proposta. Leads devem estar pelo menos na etapa de "Qualificação" ou superior.
+                    </AlertDescription>
+                  </Alert>
+                )}
+
                 <FormField
                   control={form.control}
                   name="lead_id"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Lead *</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value} disabled={eligibleLeads.length === 0}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Selecione o lead" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {leads?.map((lead) => (
-                            <SelectItem key={lead.id} value={lead.id}>
-                              {lead.nome} - {lead.telefone}
-                            </SelectItem>
-                          ))}
+                          {eligibleLeads?.map((lead) => {
+                            const leadFunil = eligibleLeadsFunil.find(lf => lf.lead_id === lead.id);
+                            const etapaNome = leadFunil ? getEtapaNome(leadFunil.etapa_id) : '';
+                            return (
+                              <SelectItem key={lead.id} value={lead.id}>
+                                {lead.nome} - {lead.telefone} {etapaNome && `(${etapaNome})`}
+                              </SelectItem>
+                            );
+                          })}
                         </SelectContent>
                       </Select>
                       <FormMessage />

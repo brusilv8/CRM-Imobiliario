@@ -1,6 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -12,12 +13,16 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, AlertCircle } from 'lucide-react';
+import { toast } from 'sonner';
 import { useLeads } from '@/hooks/useLeads';
 import { useImoveis } from '@/hooks/useImoveis';
 import { useCreateVisita } from '@/hooks/useVisitas';
 import { useAuth } from '@/hooks/useAuth';
 import { useUsuario } from '@/hooks/useUsuarios';
+import { useLeadsFunil } from '@/hooks/useFunilEtapas';
+import { useFunilValidation } from '@/hooks/useFunilValidation';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const visitSchema = z.object({
   lead_id: z.string().min(1, 'Selecione um lead'),
@@ -43,6 +48,23 @@ export function VisitFormModal({ open, onOpenChange, initialDate }: VisitFormMod
   const createVisita = useCreateVisita();
   const { user } = useAuth();
   const { data: usuario } = useUsuario(user?.id);
+  const { data: leadsFunil } = useLeadsFunil();
+  const { filterLeadsForVisits, canScheduleVisit, getEtapaNome } = useFunilValidation();
+
+  // Filtrar apenas leads elegíveis (Qualificação ou superior)
+  const eligibleLeadsFunil = useMemo(() => {
+    if (!leadsFunil) return [];
+    return filterLeadsForVisits(leadsFunil);
+  }, [leadsFunil, filterLeadsForVisits]);
+
+  const eligibleLeadIds = useMemo(() => {
+    return new Set(eligibleLeadsFunil.map(lf => lf.lead_id));
+  }, [eligibleLeadsFunil]);
+
+  const eligibleLeads = useMemo(() => {
+    if (!leads) return [];
+    return leads.filter(lead => eligibleLeadIds.has(lead.id));
+  }, [leads, eligibleLeadIds]);
 
   const form = useForm<VisitFormData>({
     resolver: zodResolver(visitSchema),
@@ -56,6 +78,15 @@ export function VisitFormModal({ open, onOpenChange, initialDate }: VisitFormMod
   });
 
   const onSubmit = async (data: VisitFormData) => {
+    // Validar etapa do lead antes de criar visita
+    const leadFunil = leadsFunil?.find(lf => lf.lead_id === data.lead_id);
+    const validation = canScheduleVisit(leadFunil || null);
+    
+    if (!validation.valid) {
+      toast.error(validation.message || 'Lead não elegível para visita');
+      return;
+    }
+
     const [hours, minutes] = data.hora.split(':');
     const dataHora = new Date(data.data_hora);
     dataHora.setHours(parseInt(hours), parseInt(minutes), 0, 0);
@@ -84,6 +115,15 @@ export function VisitFormModal({ open, onOpenChange, initialDate }: VisitFormMod
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            {eligibleLeads.length === 0 && (
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  Nenhum lead elegível para agendar visita. Leads devem estar pelo menos na etapa de "Qualificação" ou superior.
+                </AlertDescription>
+              </Alert>
+            )}
+
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -91,18 +131,22 @@ export function VisitFormModal({ open, onOpenChange, initialDate }: VisitFormMod
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Lead *</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value} disabled={eligibleLeads.length === 0}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Selecione o lead" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {leads?.map((lead) => (
-                          <SelectItem key={lead.id} value={lead.id}>
-                            {lead.nome} - {lead.telefone}
-                          </SelectItem>
-                        ))}
+                        {eligibleLeads?.map((lead) => {
+                          const leadFunil = eligibleLeadsFunil.find(lf => lf.lead_id === lead.id);
+                          const etapaNome = leadFunil ? getEtapaNome(leadFunil.etapa_id) : '';
+                          return (
+                            <SelectItem key={lead.id} value={lead.id}>
+                              {lead.nome} - {lead.telefone} {etapaNome && `(${etapaNome})`}
+                            </SelectItem>
+                          );
+                        })}
                       </SelectContent>
                     </Select>
                     <FormMessage />

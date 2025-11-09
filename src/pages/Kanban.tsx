@@ -17,6 +17,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 import {
   Select,
   SelectContent,
@@ -92,7 +93,23 @@ export default function Kanban() {
     const newEtapaId = over.id as string;
 
     const currentLeadFunil = filteredLeadsFunil?.find((lf: LeadFunil) => lf.lead_id === leadId);
-    if (currentLeadFunil?.etapa_id === newEtapaId) return;
+    if (!currentLeadFunil || currentLeadFunil.etapa_id === newEtapaId) return;
+
+    // Validar progressão no funil
+    const fromOrdem = etapas?.find(e => e.id === currentLeadFunil.etapa_id)?.ordem || 0;
+    const toOrdem = etapas?.find(e => e.id === newEtapaId)?.ordem || 0;
+
+    // Permite voltar etapas
+    if (toOrdem < fromOrdem) {
+      updateLeadEtapa.mutate({ leadId, etapaId: newEtapaId });
+      return;
+    }
+
+    // Bloqueia pular etapas ao avançar
+    if (toOrdem > fromOrdem + 1) {
+      toast.error('Não é permitido pular etapas. Avance sequencialmente.');
+      return;
+    }
 
     updateLeadEtapa.mutate({ leadId, etapaId: newEtapaId });
   };
