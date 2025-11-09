@@ -3,6 +3,7 @@ import { User, Users, Settings as SettingsIcon } from 'lucide-react';
 import { ProfileSettings } from '@/components/settings/ProfileSettings';
 import { TeamManagement } from '@/components/settings/TeamManagement';
 import { PreferencesSettings } from '@/components/settings/PreferencesSettings';
+import { FunnelRulesSettings } from '@/components/settings/FunnelRulesSettings';
 
 export default function Settings() {
   return (
@@ -13,7 +14,7 @@ export default function Settings() {
       </div>
 
       <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="grid w-full max-w-2xl grid-cols-3">
+        <TabsList className="grid w-full max-w-2xl grid-cols-4">
           <TabsTrigger value="profile" className="flex items-center gap-2">
             <User className="w-4 h-4" />
             Perfil
@@ -25,6 +26,10 @@ export default function Settings() {
           <TabsTrigger value="preferences" className="flex items-center gap-2">
             <SettingsIcon className="w-4 h-4" />
             Preferências
+          </TabsTrigger>
+          <TabsTrigger value="funnel-rules" className="flex items-center gap-2">
+            <SettingsIcon className="w-4 h-4" />
+            Regras do Funil
           </TabsTrigger>
         </TabsList>
 
@@ -38,6 +43,10 @@ export default function Settings() {
 
         <TabsContent value="preferences" className="space-y-4">
           <PreferencesSettings />
+        </TabsContent>
+
+        <TabsContent value="funnel-rules" className="space-y-4">
+          <FunnelRulesSettings />
         </TabsContent>
       </Tabs>
     </div>

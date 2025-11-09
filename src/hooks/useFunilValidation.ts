@@ -1,9 +1,11 @@
 import { useMemo } from 'react';
 import { useFunilEtapas } from './useFunilEtapas';
+import { useFunilRegras } from './useFunilRegras';
 import type { FunilEtapa, LeadFunil } from '@/types/database.types';
 
 export function useFunilValidation() {
   const { data: etapas } = useFunilEtapas();
+  const { data: regrasCustomizadas } = useFunilRegras();
 
   const etapasMap = useMemo(() => {
     if (!etapas) return new Map<string, FunilEtapa & { ordem: number }>();
@@ -27,12 +29,27 @@ export function useFunilValidation() {
       return { valid: false, message: 'Lead já está nesta etapa' };
     }
 
+    // Verificar se existe regra customizada para esta transição
+    const regraCustomizada = regrasCustomizadas?.find(
+      r => r.etapa_origem_id === fromEtapaId && r.etapa_destino_id === toEtapaId
+    );
+
+    if (regraCustomizada) {
+      // Usar regra customizada
+      if (!regraCustomizada.pode_transitar) {
+        const motivo = regraCustomizada.observacao || 'Esta transição foi bloqueada pelas regras do sistema.';
+        return { valid: false, message: motivo };
+      }
+      return { valid: true };
+    }
+
+    // Aplicar regras padrão se não houver regra customizada
     // Permite voltar etapas livremente
     if (toOrdem < fromOrdem) {
       return { valid: true };
     }
 
-    // Bloqueia pular etapas ao avançar
+    // Bloqueia pular etapas ao avançar (comportamento padrão)
     if (toOrdem > fromOrdem + 1) {
       return { 
         valid: false, 

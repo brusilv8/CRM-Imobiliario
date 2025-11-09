@@ -29,6 +29,11 @@ export interface Database {
         Insert: Omit<LeadFunil, 'id' | 'created_at'>
         Update: Partial<Omit<LeadFunil, 'id' | 'created_at'>>
       }
+      funil_regras_transicao: {
+        Row: FunilRegraTransicao
+        Insert: Omit<FunilRegraTransicao, 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Omit<FunilRegraTransicao, 'id' | 'created_at' | 'updated_at'>>
+      }
       visitas: {
         Row: Visita
         Insert: Omit<Visita, 'id' | 'created_at'>
@@ -124,6 +129,18 @@ export interface LeadFunil {
   created_at: string;
   lead?: Lead;
   etapa?: FunilEtapa;
+}
+
+export interface FunilRegraTransicao {
+  id: string;
+  etapa_origem_id: string;
+  etapa_destino_id: string;
+  pode_transitar: boolean;
+  observacao?: string;
+  created_at: string;
+  updated_at: string;
+  etapa_origem?: FunilEtapa;
+  etapa_destino?: FunilEtapa;
 }
 
 export interface Visita {
