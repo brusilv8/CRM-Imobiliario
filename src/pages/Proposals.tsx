@@ -31,13 +31,16 @@ export default function Proposals() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
   const filteredPropostas = propostas?.filter((proposta) => {
+    // Only show proposals from active leads (not finalized)
+    const isLeadActive = !proposta.lead?.finalizado;
+    
     const matchesSearch =
       proposta.codigo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       proposta.lead?.nome?.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesStatus = statusFilter === 'all' || proposta.status === statusFilter;
     
-    return matchesSearch && matchesStatus;
+    return isLeadActive && matchesSearch && matchesStatus;
   });
 
   if (isLoading) {
