@@ -9,6 +9,7 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { useFunilEtapas, useLeadsFunil, useUpdateLeadEtapa, useSyncLeadsToFunil } from "@/hooks/useFunilEtapas";
+import { useFunilValidation } from "@/hooks/useFunilValidation";
 import { KanbanColumn } from "@/components/kanban/KanbanColumn";
 import { LeadCard } from "@/components/kanban/LeadCard";
 import { LeadDetailModal } from "@/components/leads/LeadDetailModal";
@@ -44,6 +45,7 @@ export default function Kanban() {
   const { data: leadsFunil, isLoading: leadsFunilLoading } = useLeadsFunil();
   const updateLeadEtapa = useUpdateLeadEtapa();
   const syncLeads = useSyncLeadsToFunil();
+  const { canMoveToEtapa } = useFunilValidation();
 
   // Get unique origins
   const origens = useMemo(() => {
@@ -96,19 +98,11 @@ export default function Kanban() {
     const currentLeadFunil = filteredLeadsFunil?.find((lf: LeadFunil) => lf.lead_id === leadId);
     if (!currentLeadFunil || currentLeadFunil.etapa_id === newEtapaId) return;
 
-    // Validar progressão no funil
-    const fromOrdem = etapas?.find(e => e.id === currentLeadFunil.etapa_id)?.ordem || 0;
-    const toOrdem = etapas?.find(e => e.id === newEtapaId)?.ordem || 0;
-
-    // Permite voltar etapas
-    if (toOrdem < fromOrdem) {
-      updateLeadEtapa.mutate({ leadId, etapaId: newEtapaId });
-      return;
-    }
-
-    // Bloqueia pular etapas ao avançar
-    if (toOrdem > fromOrdem + 1) {
-      toast.error('Não é permitido pular etapas. Avance sequencialmente.');
+    // Validar progressão usando regras customizadas
+    const validation = canMoveToEtapa(currentLeadFunil.etapa_id, newEtapaId);
+    
+    if (!validation.valid) {
+      toast.error(validation.message || 'Movimento não permitido');
       return;
     }
 

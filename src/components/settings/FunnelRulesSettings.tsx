@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -26,8 +26,8 @@ export function FunnelRulesSettings() {
   };
 
   // Inicializar regras existentes quando carregarem
-  useMemo(() => {
-    if (!regrasExistentes || regras.size > 0) return;
+  useEffect(() => {
+    if (!regrasExistentes) return;
     
     const newRegras = new Map<string, boolean>();
     const newObs = new Map<string, string>();
@@ -42,6 +42,7 @@ export function FunnelRulesSettings() {
     
     setRegras(newRegras);
     setObservacoes(newObs);
+    setHasChanges(false);
   }, [regrasExistentes]);
 
   // Gerar todas as transições possíveis
