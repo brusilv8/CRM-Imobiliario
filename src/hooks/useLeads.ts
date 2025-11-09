@@ -157,6 +157,13 @@ export function useFinalizarLead() {
       // Remove from funnel
       await supabase.from('lead_funil').delete().eq('lead_id', id);
 
+      // Archive all active proposals from this lead
+      await supabase
+        .from('propostas')
+        .update({ finalizada: true })
+        .eq('lead_id', id)
+        .eq('finalizada', false);
+
       // Create interaction
       await supabase.from('lead_interacoes').insert({
         lead_id: id,

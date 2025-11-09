@@ -176,6 +176,7 @@ export interface Proposta {
   condicoes_especiais?: string;
   status: 'pendente' | 'em_analise' | 'aceita' | 'recusada' | 'cancelada';
   validade: string;
+  finalizada?: boolean;
   created_at: string;
   updated_at?: string;
   lead?: Lead;
