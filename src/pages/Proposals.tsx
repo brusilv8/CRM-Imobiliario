@@ -16,15 +16,17 @@ import { Plus, Search } from 'lucide-react';
 import { ProposalFormModal } from '@/components/proposals/ProposalFormModal';
 import { ProposalDetailModal } from '@/components/proposals/ProposalDetailModal';
 import { StatusBadgeSelect } from '@/components/proposals/StatusBadgeSelect';
+import { LeadDetailModal } from '@/components/leads/LeadDetailModal';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import type { Proposta } from '@/types/database.types';
+import type { Proposta, Lead } from '@/types/database.types';
 
 export default function Proposals() {
   const { data: propostas, isLoading } = usePropostas();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProposta, setEditingProposta] = useState<Proposta | null>(null);
   const [selectedProposta, setSelectedProposta] = useState<Proposta | null>(null);
+  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
@@ -108,7 +110,15 @@ export default function Proposals() {
                       onClick={() => setSelectedProposta(proposta)}
                     >
                       <TableCell className="font-medium">{proposta.codigo || 'N/A'}</TableCell>
-                      <TableCell>{proposta.lead?.nome || 'N/A'}</TableCell>
+                      <TableCell 
+                        className="text-primary hover:underline cursor-pointer font-medium"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (proposta.lead) setSelectedLead(proposta.lead as Lead);
+                        }}
+                      >
+                        {proposta.lead?.nome || 'N/A'}
+                      </TableCell>
                       <TableCell>
                         {proposta.imovel?.tipo || 'N/A'} - {proposta.imovel?.endereco || 'N/A'}
                       </TableCell>
@@ -165,6 +175,12 @@ export default function Proposals() {
           }}
         />
       )}
+
+      <LeadDetailModal
+        lead={selectedLead}
+        open={!!selectedLead}
+        onOpenChange={(open) => !open && setSelectedLead(null)}
+      />
     </div>
   );
 }
