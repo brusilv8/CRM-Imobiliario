@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { usePropostas } from '@/hooks/usePropostas';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -13,23 +12,18 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Plus, Search, Eye } from 'lucide-react';
+import { Plus, Search } from 'lucide-react';
 import { ProposalFormModal } from '@/components/proposals/ProposalFormModal';
 import { ProposalDetailModal } from '@/components/proposals/ProposalDetailModal';
+import { StatusBadgeSelect } from '@/components/proposals/StatusBadgeSelect';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import type { Proposta } from '@/types/database.types';
 
-const statusConfig = {
-  enviada: { label: 'Enviada', variant: 'default' as const },
-  em_analise: { label: 'Em Análise', variant: 'secondary' as const },
-  aprovada: { label: 'Aprovada', variant: 'default' as const },
-  recusada: { label: 'Recusada', variant: 'destructive' as const },
-};
-
 export default function Proposals() {
   const { data: propostas, isLoading } = usePropostas();
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingProposta, setEditingProposta] = useState<Proposta | null>(null);
   const [selectedProposta, setSelectedProposta] = useState<Proposta | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -82,10 +76,11 @@ export default function Proposals() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos os Status</SelectItem>
-              <SelectItem value="enviada">Enviada</SelectItem>
+              <SelectItem value="pendente">Pendente</SelectItem>
               <SelectItem value="em_analise">Em Análise</SelectItem>
-              <SelectItem value="aprovada">Aprovada</SelectItem>
+              <SelectItem value="aceita">Aceita</SelectItem>
               <SelectItem value="recusada">Recusada</SelectItem>
+              <SelectItem value="cancelada">Cancelada</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -106,9 +101,12 @@ export default function Proposals() {
             <TableBody>
               {filteredPropostas && filteredPropostas.length > 0 ? (
                 filteredPropostas.map((proposta) => {
-                  const statusInfo = statusConfig[proposta.status as keyof typeof statusConfig] || statusConfig.enviada;
                   return (
-                    <TableRow key={proposta.id}>
+                    <TableRow 
+                      key={proposta.id}
+                      className="cursor-pointer hover:bg-muted/50"
+                      onClick={() => setSelectedProposta(proposta)}
+                    >
                       <TableCell className="font-medium">{proposta.codigo || 'N/A'}</TableCell>
                       <TableCell>{proposta.lead?.nome || 'N/A'}</TableCell>
                       <TableCell>
@@ -120,20 +118,17 @@ export default function Proposals() {
                           currency: 'BRL',
                         }) || 'R$ 0,00'}
                       </TableCell>
-                      <TableCell>
-                        <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>
+                      <TableCell onClick={(e) => e.stopPropagation()}>
+                        <StatusBadgeSelect 
+                          propostaId={proposta.id} 
+                          currentStatus={proposta.status} 
+                        />
                       </TableCell>
                       <TableCell>
                         {proposta.validade ? format(new Date(proposta.validade), 'dd/MM/yyyy', { locale: ptBR }) : 'N/A'}
                       </TableCell>
                       <TableCell>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setSelectedProposta(proposta)}
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
+                        <div className="text-muted-foreground text-sm">Ver detalhes →</div>
                       </TableCell>
                     </TableRow>
                   );
@@ -150,13 +145,24 @@ export default function Proposals() {
         </div>
       </Card>
 
-      <ProposalFormModal open={isFormOpen} onOpenChange={setIsFormOpen} />
+      <ProposalFormModal 
+        open={isFormOpen || !!editingProposta} 
+        onOpenChange={(open) => {
+          setIsFormOpen(open);
+          if (!open) setEditingProposta(null);
+        }}
+        proposta={editingProposta}
+      />
 
       {selectedProposta && (
         <ProposalDetailModal
           proposal={selectedProposta}
           open={!!selectedProposta}
           onOpenChange={() => setSelectedProposta(null)}
+          onEdit={(proposta) => {
+            setEditingProposta(proposta);
+            setSelectedProposta(null);
+          }}
         />
       )}
     </div>

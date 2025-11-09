@@ -1,27 +1,58 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { FileText, User, Home, Calendar, DollarSign, CheckCircle2 } from 'lucide-react';
+import { FileText, User, Home, Calendar, DollarSign, CheckCircle2, Edit2, Trash2 } from 'lucide-react';
+import { useDeleteProposta } from '@/hooks/usePropostas';
+import { StatusBadgeSelect } from './StatusBadgeSelect';
 import type { Proposta } from '@/types/database.types';
 
 interface ProposalDetailModalProps {
   proposal: Proposta;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onEdit?: (proposta: Proposta) => void;
 }
 
 const statusConfig = {
-  enviada: { label: 'Enviada', variant: 'default' as const, color: 'bg-blue-500' },
-  em_analise: { label: 'Em Análise', variant: 'secondary' as const, color: 'bg-yellow-500' },
-  aprovada: { label: 'Aprovada', variant: 'default' as const, color: 'bg-green-500' },
+  pendente: { label: 'Pendente', variant: 'secondary' as const, color: 'bg-gray-500' },
+  em_analise: { label: 'Em Análise', variant: 'default' as const, color: 'bg-yellow-500' },
+  aceita: { label: 'Aceita', variant: 'default' as const, color: 'bg-green-500' },
   recusada: { label: 'Recusada', variant: 'destructive' as const, color: 'bg-red-500' },
+  cancelada: { label: 'Cancelada', variant: 'outline' as const, color: 'bg-gray-400' },
 };
 
-export function ProposalDetailModal({ proposal, open, onOpenChange }: ProposalDetailModalProps) {
-  const statusInfo = statusConfig[proposal.status];
+export function ProposalDetailModal({ proposal, open, onOpenChange, onEdit }: ProposalDetailModalProps) {
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const deleteProposta = useDeleteProposta();
+  const statusInfo = statusConfig[proposal.status as keyof typeof statusConfig] || statusConfig.pendente;
+
+  const handleDelete = async () => {
+    await deleteProposta.mutateAsync(proposal.id);
+    setShowDeleteDialog(false);
+    onOpenChange(false);
+  };
+
+  const handleEdit = () => {
+    onEdit?.(proposal);
+  };
+
+  // Não permite editar/excluir se aceita
+  const isEditable = proposal.status !== 'aceita';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -32,7 +63,7 @@ export function ProposalDetailModal({ proposal, open, onOpenChange }: ProposalDe
               <FileText className="w-5 h-5" />
               Proposta {proposal.codigo}
             </DialogTitle>
-            <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>
+            <StatusBadgeSelect propostaId={proposal.id} currentStatus={proposal.status} />
           </div>
         </DialogHeader>
 
@@ -184,7 +215,43 @@ export function ProposalDetailModal({ proposal, open, onOpenChange }: ProposalDe
             </div>
           </TabsContent>
         </Tabs>
+
+        <DialogFooter className="gap-2">
+          <Button
+            variant="outline"
+            onClick={handleEdit}
+            disabled={!isEditable}
+          >
+            <Edit2 className="w-4 h-4 mr-2" />
+            Editar Proposta
+          </Button>
+          <Button
+            variant="destructive"
+            onClick={() => setShowDeleteDialog(true)}
+            disabled={!isEditable}
+          >
+            <Trash2 className="w-4 h-4 mr-2" />
+            Excluir Proposta
+          </Button>
+        </DialogFooter>
       </DialogContent>
+
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir Proposta</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir a proposta {proposal.codigo}? Essa ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   );
 }

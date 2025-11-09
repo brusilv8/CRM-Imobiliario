@@ -81,3 +81,50 @@ export function useUpdateProposta() {
     },
   });
 }
+
+export function useDeleteProposta() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('propostas')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['propostas'] });
+      toast.success('Proposta excluída com sucesso!');
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Erro ao excluir proposta');
+    },
+  });
+}
+
+export function useUpdatePropostaStatus() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      const { data, error } = await supabase
+        .from('propostas')
+        .update({ status, updated_at: new Date().toISOString() })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data as Proposta;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['propostas'] });
+      toast.success('Status atualizado com sucesso!');
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Erro ao atualizar status');
+    },
+  });
+}

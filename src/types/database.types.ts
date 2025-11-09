@@ -172,7 +172,7 @@ export interface Proposta {
   num_parcelas?: number;
   usa_fgts: boolean;
   condicoes_especiais?: string;
-  status: 'enviada' | 'em_analise' | 'aprovada' | 'recusada';
+  status: 'pendente' | 'em_analise' | 'aceita' | 'recusada' | 'cancelada';
   validade: string;
   created_at: string;
   updated_at?: string;

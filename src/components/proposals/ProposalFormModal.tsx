@@ -16,11 +16,12 @@ import { format, addDays } from 'date-fns';
 import { CalendarIcon, ChevronLeft, ChevronRight, AlertCircle } from 'lucide-react';
 import { useLeads } from '@/hooks/useLeads';
 import { useImoveis } from '@/hooks/useImoveis';
-import { useCreateProposta } from '@/hooks/usePropostas';
+import { useCreateProposta, useUpdateProposta } from '@/hooks/usePropostas';
 import { useLeadsFunil } from '@/hooks/useFunilEtapas';
 import { useFunilValidation } from '@/hooks/useFunilValidation';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
+import type { Proposta } from '@/types/database.types';
 
 const proposalSchema = z.object({
   lead_id: z.string().min(1, 'Selecione um lead'),
@@ -38,15 +39,19 @@ type ProposalFormData = z.infer<typeof proposalSchema>;
 interface ProposalFormModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  proposta?: Proposta | null;
 }
 
-export function ProposalFormModal({ open, onOpenChange }: ProposalFormModalProps) {
+export function ProposalFormModal({ open, onOpenChange, proposta }: ProposalFormModalProps) {
   const [step, setStep] = useState(1);
   const { data: leads } = useLeads();
   const { data: imoveis } = useImoveis();
   const createProposta = useCreateProposta();
+  const updateProposta = useUpdateProposta();
   const { data: leadsFunil } = useLeadsFunil();
   const { filterLeadsForProposals, canCreateProposal, getEtapaNome } = useFunilValidation();
+
+  const isEditMode = !!proposta;
 
   // Filtrar apenas leads elegíveis (Qualificação ou superior)
   const eligibleLeadsFunil = useMemo(() => {
@@ -65,7 +70,16 @@ export function ProposalFormModal({ open, onOpenChange }: ProposalFormModalProps
 
   const form = useForm<ProposalFormData>({
     resolver: zodResolver(proposalSchema),
-    defaultValues: {
+    defaultValues: proposta ? {
+      lead_id: proposta.lead_id,
+      imovel_id: proposta.imovel_id,
+      valor: proposta.valor,
+      validade: new Date(proposta.validade),
+      valor_entrada: proposta.valor_entrada || undefined,
+      num_parcelas: proposta.num_parcelas || 360,
+      usa_fgts: proposta.usa_fgts || false,
+      condicoes_especiais: proposta.condicoes_especiais || undefined,
+    } : {
       validade: addDays(new Date(), 15),
       usa_fgts: false,
       num_parcelas: 360,
@@ -87,32 +101,47 @@ export function ProposalFormModal({ open, onOpenChange }: ProposalFormModalProps
       : 0;
 
   const onSubmit = async (data: ProposalFormData) => {
-    // Só permite criar proposta se estiver na etapa final
+    // Só permite criar/editar proposta se estiver na etapa final
     if (step !== 3) {
       nextStep();
       return;
     }
 
-    // Validar etapa do lead antes de criar proposta
-    const leadFunil = leadsFunil?.find(lf => lf.lead_id === data.lead_id);
-    const validation = canCreateProposal(leadFunil || null);
-    
-    if (!validation.valid) {
-      toast.error(validation.message || 'Lead não elegível para proposta');
-      return;
-    }
+    if (isEditMode && proposta) {
+      // Modo edição
+      await updateProposta.mutateAsync({
+        id: proposta.id,
+        lead_id: data.lead_id,
+        imovel_id: data.imovel_id,
+        valor: data.valor,
+        valor_entrada: data.valor_entrada,
+        num_parcelas: data.num_parcelas,
+        usa_fgts: data.usa_fgts,
+        condicoes_especiais: data.condicoes_especiais,
+        validade: data.validade.toISOString(),
+      });
+    } else {
+      // Validar etapa do lead antes de criar proposta
+      const leadFunil = leadsFunil?.find(lf => lf.lead_id === data.lead_id);
+      const validation = canCreateProposal(leadFunil || null);
+      
+      if (!validation.valid) {
+        toast.error(validation.message || 'Lead não elegível para proposta');
+        return;
+      }
 
-    await createProposta.mutateAsync({
-      lead_id: data.lead_id,
-      imovel_id: data.imovel_id,
-      valor: data.valor,
-      valor_entrada: data.valor_entrada,
-      num_parcelas: data.num_parcelas,
-      usa_fgts: data.usa_fgts,
-      condicoes_especiais: data.condicoes_especiais,
-      status: 'enviada',
-      validade: data.validade.toISOString(),
-    });
+      await createProposta.mutateAsync({
+        lead_id: data.lead_id,
+        imovel_id: data.imovel_id,
+        valor: data.valor,
+        valor_entrada: data.valor_entrada,
+        num_parcelas: data.num_parcelas,
+        usa_fgts: data.usa_fgts,
+        condicoes_especiais: data.condicoes_especiais,
+        status: 'pendente',
+        validade: data.validade.toISOString(),
+      });
+    }
 
     form.reset();
     setStep(1);
@@ -126,7 +155,7 @@ export function ProposalFormModal({ open, onOpenChange }: ProposalFormModalProps
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl">
         <DialogHeader>
-          <DialogTitle>Nova Proposta Comercial</DialogTitle>
+          <DialogTitle>{isEditMode ? 'Editar' : 'Nova'} Proposta Comercial</DialogTitle>
           <div className="flex items-center gap-2 mt-4">
             {[1, 2, 3].map((s) => (
               <div
