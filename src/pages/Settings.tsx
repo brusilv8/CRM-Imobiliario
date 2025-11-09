@@ -4,8 +4,12 @@ import { ProfileSettings } from '@/components/settings/ProfileSettings';
 import { TeamManagement } from '@/components/settings/TeamManagement';
 import { PreferencesSettings } from '@/components/settings/PreferencesSettings';
 import { FunnelRulesSettings } from '@/components/settings/FunnelRulesSettings';
+import { useSearchParams } from 'react-router-dom';
 
 export default function Settings() {
+  const [searchParams] = useSearchParams();
+  const defaultTab = searchParams.get('tab') || 'profile';
+
   return (
     <div className="space-y-6">
       <div>
@@ -13,7 +17,7 @@ export default function Settings() {
         <p className="text-muted-foreground">Gerencie suas preferências e equipe</p>
       </div>
 
-      <Tabs defaultValue="profile" className="space-y-6">
+      <Tabs defaultValue={defaultTab} className="space-y-6">
         <TabsList className="grid w-full max-w-2xl grid-cols-4">
           <TabsTrigger value="profile" className="flex items-center gap-2">
             <User className="w-4 h-4" />

@@ -25,7 +25,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { RefreshCw, Filter, X, Flame, Sun, Snowflake, Users, ChevronRight, ChevronLeft } from "lucide-react";
+import { RefreshCw, Filter, X, Flame, Sun, Snowflake, Users, ChevronRight, ChevronLeft, Settings } from "lucide-react";
+import { Link } from "react-router-dom";
 import type { Lead, LeadFunil } from "@/types/database.types";
 
 export default function Kanban() {
@@ -253,6 +254,17 @@ export default function Kanban() {
             <RefreshCw className={`w-3.5 h-3.5 ${syncLeads.isPending ? 'animate-spin' : ''}`} />
             Sincronizar
           </Button>
+
+          <Link to="/settings?tab=funnel-rules">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="gap-1.5"
+            >
+              <Settings className="w-3.5 h-3.5" />
+              Regras do Funil
+            </Button>
+          </Link>
         </div>
       </div>
 
