@@ -26,9 +26,10 @@ export function useLeadsFunil() {
         .from('lead_funil')
         .select(`
           *,
-          lead:leads(*),
+          lead:leads!inner(*),
           etapa:funil_etapas(*)
         `)
+        .eq('lead.finalizado', false)
         .order('data_entrada', { ascending: false });
 
       if (error) throw error;

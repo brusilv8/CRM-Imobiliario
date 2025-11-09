@@ -135,3 +135,99 @@ export function useDeleteLead() {
     },
   });
 }
+
+export function useFinalizarLead() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { data, error } = await supabase
+        .from('leads')
+        .update({
+          finalizado: true,
+          data_finalizacao: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Remove from funnel
+      await supabase.from('lead_funil').delete().eq('lead_id', id);
+
+      // Create interaction
+      await supabase.from('lead_interacoes').insert({
+        lead_id: id,
+        tipo: 'observacao',
+        descricao: 'Lead marcado como finalizado e convertido em cliente',
+      });
+
+      return data as Lead;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['leads'] });
+      queryClient.invalidateQueries({ queryKey: ['leads_funil'] });
+      toast.success('Lead finalizado com sucesso!');
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Erro ao finalizar lead');
+    },
+  });
+}
+
+export function useReativarLead() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { data, error } = await supabase
+        .from('leads')
+        .update({
+          finalizado: false,
+          data_finalizacao: null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Add back to first funnel stage
+      const { data: etapa, error: etapaError } = await supabase
+        .from('funil_etapas')
+        .select('id')
+        .order('ordem', { ascending: true })
+        .limit(1)
+        .single();
+
+      if (etapaError) throw etapaError;
+
+      await supabase.from('lead_funil').insert({
+        lead_id: id,
+        etapa_id: etapa.id,
+        data_entrada: new Date().toISOString(),
+      });
+
+      // Create interaction
+      await supabase.from('lead_interacoes').insert({
+        lead_id: id,
+        tipo: 'observacao',
+        descricao: 'Cliente reativado no funil de vendas',
+      });
+
+      return data as Lead;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['leads'] });
+      queryClient.invalidateQueries({ queryKey: ['leads_funil'] });
+      toast.success('Cliente reativado com sucesso!');
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Erro ao reativar cliente');
+    },
+  });
+}
+

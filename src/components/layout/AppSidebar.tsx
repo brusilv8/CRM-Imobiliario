@@ -5,7 +5,9 @@ import {
   Calendar,
   FileText,
   BarChart3,
-  Settings
+  Settings,
+  UserCheck,
+  History
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -28,6 +30,8 @@ const menuItems = [
   { title: "Imóveis", url: "/properties", icon: Home },
   { title: "Agenda", url: "/calendar", icon: Calendar },
   { title: "Propostas", url: "/proposals", icon: FileText },
+  { title: "Clientes", url: "/customers", icon: UserCheck },
+  { title: "Histórico", url: "/proposal-history", icon: History },
   { title: "Configurações", url: "/settings", icon: Settings },
 ];
 

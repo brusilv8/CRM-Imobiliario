@@ -11,6 +11,8 @@ import Properties from "./pages/Properties";
 import Kanban from "./pages/Kanban";
 import Calendar from "./pages/Calendar";
 import Proposals from "./pages/Proposals";
+import Customers from "./pages/Customers";
+import ProposalHistory from "./pages/ProposalHistory";
 import Settings from "./pages/Settings";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
@@ -71,6 +73,20 @@ const App = () => (
             <ProtectedRoute>
               <AppLayout>
                 <Proposals />
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/customers" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <Customers />
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/proposal-history" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <ProposalHistory />
               </AppLayout>
             </ProtectedRoute>
           } />

@@ -28,6 +28,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { FinalizarLeadButton } from "./FinalizarLeadButton";
 
 interface LeadDetailModalProps {
   lead: Lead | null;
@@ -117,6 +118,13 @@ export function LeadDetailModal({ lead, open, onOpenChange }: LeadDetailModalPro
               <div className="flex gap-2">
                 {!isEditing ? (
                   <>
+                    {!lead.finalizado && (
+                      <FinalizarLeadButton
+                        leadId={lead.id}
+                        leadNome={lead.nome}
+                        onSuccess={() => onOpenChange(false)}
+                      />
+                    )}
                     <Button
                       variant="outline"
                       size="sm"

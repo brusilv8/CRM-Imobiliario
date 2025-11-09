@@ -80,6 +80,8 @@ export interface Lead {
   interesse?: string;
   observacoes?: string;
   tags?: string[];
+  finalizado?: boolean;
+  data_finalizacao?: string;
   created_at: string;
   updated_at?: string;
   ultimo_contato?: string;
