@@ -54,6 +54,11 @@ export interface Database {
         Insert: Omit<ImovelMidia, 'id' | 'created_at'>
         Update: Partial<Omit<ImovelMidia, 'id' | 'created_at'>>
       }
+      atividades_sistema: {
+        Row: AtividadeSistema
+        Insert: Omit<AtividadeSistema, 'id' | 'created_at'>
+        Update: Partial<Omit<AtividadeSistema, 'id' | 'created_at'>>
+      }
     }
   }
 }
@@ -191,4 +196,23 @@ export interface ImovelMidia {
   ordem?: number;
   is_principal: boolean;
   created_at: string;
+}
+
+export interface AtividadeSistema {
+  id: string;
+  tipo: string;
+  titulo: string;
+  descricao?: string;
+  usuario_id?: string;
+  lead_id?: string;
+  imovel_id?: string;
+  proposta_id?: string;
+  visita_id?: string;
+  metadata?: Record<string, any>;
+  created_at: string;
+  usuario?: Usuario;
+  lead?: Lead;
+  imovel?: Imovel;
+  proposta?: Proposta;
+  visita?: Visita;
 }

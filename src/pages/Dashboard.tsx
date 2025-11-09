@@ -8,8 +8,8 @@ import {
 } from "lucide-react";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { FunnelChart } from "@/components/dashboard/FunnelChart";
-import { RecentActivity } from "@/components/dashboard/RecentActivity";
-import { useDashboardMetrics, useFunnelData, useRecentActivities } from "@/hooks/useDashboardMetrics";
+import { AtividadesRecentes } from "@/components/dashboard/AtividadesRecentes";
+import { useDashboardMetrics } from "@/hooks/useDashboardMetrics";
 import { useImoveis } from "@/hooks/useImoveis";
 
 export default function Dashboard() {
@@ -71,7 +71,7 @@ export default function Dashboard() {
           <FunnelChart />
         </div>
         <div>
-          <RecentActivity />
+          <AtividadesRecentes />
         </div>
       </div>
     </div>
