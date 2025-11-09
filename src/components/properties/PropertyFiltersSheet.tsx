@@ -51,7 +51,7 @@ export function PropertyFiltersSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent>
+      <SheetContent className="flex flex-col">
         <SheetHeader>
           <SheetTitle>Filtros Avançados</SheetTitle>
           <SheetDescription>
@@ -59,8 +59,8 @@ export function PropertyFiltersSheet({
           </SheetDescription>
         </SheetHeader>
 
-        <ScrollArea className="h-[calc(100vh-180px)] pr-4">
-          <div className="space-y-6 mt-6">
+        <ScrollArea className="flex-1 -mx-6 px-6">
+          <div className="space-y-6 mt-6 pb-4">
             {/* Tipo */}
             <div className="space-y-2">
               <Label>Tipo de Imóvel</Label>
@@ -190,7 +190,7 @@ export function PropertyFiltersSheet({
         </ScrollArea>
 
         {/* Botões */}
-        <div className="flex flex-col gap-2 pt-4 border-t mt-4">
+        <div className="flex flex-col gap-2 pt-4 border-t">
           <Button onClick={handleApply} className="w-full">
             Aplicar Filtros
           </Button>
