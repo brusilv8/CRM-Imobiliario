@@ -21,10 +21,12 @@ import {
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
-import { useCreateImovel } from "@/hooks/useImoveis";
+import { useCreateImovel, useUpdateImovel } from "@/hooks/useImoveis";
+import type { Imovel } from "@/types/database.types";
 import InputMask from "react-input-mask";
 import { toast } from "sonner";
 import { Upload, X } from "lucide-react";
+import { useEffect } from "react";
 
 const propertySchema = z.object({
   tipo: z.string().min(1, "Tipo é obrigatório"),
@@ -54,14 +56,18 @@ type PropertyFormData = z.infer<typeof propertySchema>;
 interface PropertyFormModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  property?: Imovel | null;
 }
 
-export function PropertyFormModal({ open, onOpenChange }: PropertyFormModalProps) {
+export function PropertyFormModal({ open, onOpenChange, property }: PropertyFormModalProps) {
   const [step, setStep] = useState(1);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const createImovel = useCreateImovel();
+  const updateImovel = useUpdateImovel();
+  
+  const isEditing = !!property;
   
   const {
     register,
@@ -80,6 +86,33 @@ export function PropertyFormModal({ open, onOpenChange }: PropertyFormModalProps
 
   const finalidade = watch("finalidade");
   const cep = watch("cep");
+
+  // Preencher formulário quando estiver editando
+  useEffect(() => {
+    if (property && open) {
+      setValue("tipo", property.tipo);
+      setValue("finalidade", property.finalidade);
+      setValue("cep", property.cep);
+      setValue("endereco", property.endereco);
+      setValue("cidade", property.cidade);
+      setValue("estado", property.estado);
+      setValue("bairro", property.bairro);
+      setValue("numero", property.numero || "");
+      setValue("complemento", property.complemento || "");
+      setValue("valor_venda", property.valor_venda || undefined);
+      setValue("valor_aluguel", property.valor_aluguel || undefined);
+      setValue("valor_condominio", property.valor_condominio || undefined);
+      setValue("valor_iptu", property.valor_iptu || undefined);
+      setValue("quartos", property.quartos || undefined);
+      setValue("banheiros", property.banheiros || undefined);
+      setValue("vagas", property.vagas || undefined);
+      setValue("area_total", property.area_total || undefined);
+      setValue("area_util", property.area_util || undefined);
+      setValue("descricao", property.descricao || "");
+      setValue("status", property.status);
+      setUploadedImage(property.imagem_principal || null);
+    }
+  }, [property, open, setValue]);
 
   const fetchAddressByCEP = async (cep: string) => {
     const cleanCEP = cep.replace(/\D/g, '');
@@ -173,11 +206,8 @@ export function PropertyFormModal({ open, onOpenChange }: PropertyFormModalProps
   };
 
   const handleFinalSubmit = async () => {
-    console.log('🔵 BOTÃO CLICADO!');
-    
     // Pegar todos os valores atuais do formulário
     const formValues = watch();
-    console.log('📋 Estado atual:', formValues);
     
     // Validação básica
     if (!formValues.tipo || !formValues.finalidade || !formValues.endereco || 
@@ -211,21 +241,21 @@ export function PropertyFormModal({ open, onOpenChange }: PropertyFormModalProps
       imagem_principal: uploadedImage || null,
     };
     
-    console.log('🟢 INÍCIO onSubmit');
-    console.log('📦 Payload:', payload);
-    
     try {
-      console.log('🚀 Chamando mutation...');
-      await createImovel.mutateAsync(payload as any);
-      console.log('✅ Sucesso!');
-      toast.success('Imóvel cadastrado com sucesso!');
+      if (isEditing && property) {
+        await updateImovel.mutateAsync({ id: property.id, ...payload } as any);
+        toast.success('Imóvel atualizado com sucesso!');
+      } else {
+        await createImovel.mutateAsync(payload as any);
+        toast.success('Imóvel cadastrado com sucesso!');
+      }
       reset();
       setStep(1);
+      setUploadedImage(null);
       onOpenChange(false);
     } catch (error: any) {
-      console.error('❌ Erro:', error);
-      console.error('❌ Detalhes:', error.message);
-      toast.error('Erro ao cadastrar: ' + (error.message || 'Erro desconhecido'));
+      console.error('Erro:', error);
+      toast.error(`Erro ao ${isEditing ? 'atualizar' : 'cadastrar'}: ${error.message || 'Erro desconhecido'}`);
     }
   };
 
@@ -240,7 +270,7 @@ export function PropertyFormModal({ open, onOpenChange }: PropertyFormModalProps
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Cadastrar Novo Imóvel</DialogTitle>
+          <DialogTitle>{isEditing ? 'Editar Imóvel' : 'Cadastrar Novo Imóvel'}</DialogTitle>
         </DialogHeader>
 
         {/* Progress Indicator */}

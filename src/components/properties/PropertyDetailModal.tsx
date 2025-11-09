@@ -32,6 +32,7 @@ import {
   Edit,
 } from "lucide-react";
 import { useDeleteImovel } from "@/hooks/useImoveis";
+import { PropertyFormModal } from "./PropertyFormModal";
 import type { Imovel } from "@/types/database.types";
 
 const statusLabels = {
@@ -56,6 +57,7 @@ interface PropertyDetailModalProps {
 
 export function PropertyDetailModal({ property, open, onOpenChange }: PropertyDetailModalProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const deleteImovel = useDeleteImovel();
 
   if (!property) return null;
@@ -81,7 +83,11 @@ export function PropertyDetailModal({ property, open, onOpenChange }: PropertyDe
             <DialogTitle className="flex items-center justify-between">
               <span>Detalhes do Imóvel</span>
               <div className="flex gap-2">
-                <Button variant="outline" size="sm">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setShowEditModal(true)}
+                >
                   <Edit className="w-4 h-4" />
                 </Button>
                 <Button 
@@ -233,6 +239,12 @@ export function PropertyDetailModal({ property, open, onOpenChange }: PropertyDe
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <PropertyFormModal 
+        open={showEditModal} 
+        onOpenChange={setShowEditModal}
+        property={property}
+      />
     </>
   );
 }
