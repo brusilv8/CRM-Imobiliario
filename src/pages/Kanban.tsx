@@ -239,17 +239,6 @@ export default function Kanban() {
         </div>
       </div>
 
-      {/* Botão fixo para voltar ao início */}
-      <Button
-        variant="outline"
-        size="icon"
-        onClick={scrollToStart}
-        className="fixed left-6 top-1/2 -translate-y-1/2 z-40 shadow-lg hover:shadow-xl transition-shadow"
-        title="Voltar ao início"
-      >
-        <ChevronLeft className="w-5 h-5" />
-      </Button>
-
       {/* Botão fixo para ir ao final */}
       <Button
         variant="outline"
@@ -268,6 +257,19 @@ export default function Kanban() {
         onDragCancel={handleDragCancel}
       >
         <div className="flex gap-2.5 overflow-x-auto pb-3 kanban-scroll">
+          {/* Botão para voltar ao início */}
+          <div className="flex-shrink-0 flex items-center justify-center w-20">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={scrollToStart}
+              className="shadow-md hover:shadow-lg transition-shadow"
+              title="Voltar ao início"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </Button>
+          </div>
+          
           {etapas?.map((etapa) => {
             const leadsNaEtapa = filteredLeadsFunil?.filter(
               (lf: LeadFunil) => lf.etapa_id === etapa.id
