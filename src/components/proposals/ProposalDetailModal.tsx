@@ -19,6 +19,7 @@ import { ptBR } from 'date-fns/locale';
 import { FileText, User, Home, Calendar, DollarSign, CheckCircle2, Edit2, Trash2 } from 'lucide-react';
 import { useDeleteProposta } from '@/hooks/usePropostas';
 import { StatusBadgeSelect } from './StatusBadgeSelect';
+import { cn } from '@/lib/utils';
 import type { Proposta } from '@/types/database.types';
 
 interface ProposalDetailModalProps {
@@ -254,8 +255,4 @@ export function ProposalDetailModal({ proposal, open, onOpenChange, onEdit }: Pr
       </AlertDialog>
     </Dialog>
   );
-}
-
-function cn(...classes: any[]) {
-  return classes.filter(Boolean).join(' ');
 }
