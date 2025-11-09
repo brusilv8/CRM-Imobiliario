@@ -8,10 +8,10 @@ interface AppLayoutProps {
 export function AppLayout({ children }: AppLayoutProps) {
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-muted/30">
+      <div className="flex min-h-screen w-full bg-background">
         <AppSidebar />
         <div className="flex-1 flex flex-col">
-          <header className="h-16 border-b bg-card flex items-center px-6 sticky top-0 z-10">
+          <header className="h-16 border-b bg-card flex items-center px-6 sticky top-0 z-50">
             <SidebarTrigger className="mr-4" />
             <div className="flex-1 flex items-center justify-between">
               <h2 className="text-lg font-semibold">CRM Imobiliário</h2>
@@ -20,7 +20,7 @@ export function AppLayout({ children }: AppLayoutProps) {
               </div>
             </div>
           </header>
-          <main className="flex-1 p-6">
+          <main className="flex-1 p-6 bg-background">
             {children}
           </main>
         </div>

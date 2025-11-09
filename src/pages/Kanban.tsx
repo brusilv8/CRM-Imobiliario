@@ -24,7 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { RefreshCw, Filter, X, Flame, Sun, Snowflake, Users } from "lucide-react";
+import { RefreshCw, Filter, X, Flame, Sun, Snowflake, Users, ChevronRight, ChevronLeft } from "lucide-react";
 import type { Lead, LeadFunil } from "@/types/database.types";
 
 export default function Kanban() {
@@ -108,6 +108,20 @@ export default function Kanban() {
 
   const handleDragCancel = () => {
     setActiveId(null);
+  };
+
+  const scrollToEnd = () => {
+    const container = document.querySelector('.kanban-scroll');
+    if (container) {
+      container.scrollTo({ left: container.scrollWidth, behavior: 'smooth' });
+    }
+  };
+
+  const scrollToStart = () => {
+    const container = document.querySelector('.kanban-scroll');
+    if (container) {
+      container.scrollTo({ left: 0, behavior: 'smooth' });
+    }
   };
 
   if (etapasLoading || leadsFunilLoading) {
@@ -225,6 +239,17 @@ export default function Kanban() {
         </div>
       </div>
 
+      {/* Botão fixo para ir ao final */}
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={scrollToEnd}
+        className="fixed right-6 top-1/2 -translate-y-1/2 z-40 shadow-lg hover:shadow-xl transition-shadow"
+        title="Ir para o final"
+      >
+        <ChevronRight className="w-5 h-5" />
+      </Button>
+
       <DndContext
         sensors={sensors}
         onDragStart={handleDragStart}
@@ -246,6 +271,19 @@ export default function Kanban() {
               />
             );
           })}
+          
+          {/* Botão para voltar ao início */}
+          <div className="flex-shrink-0 flex items-center justify-center w-20">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={scrollToStart}
+              className="shadow-md hover:shadow-lg transition-shadow"
+              title="Voltar ao início"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </Button>
+          </div>
         </div>
 
         <DragOverlay>
