@@ -1,8 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
+import { useEffect } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 
 export function useDashboardMetrics() {
-  return useQuery({
+  const queryClient = useQueryClient();
+
+  const query = useQuery({
     queryKey: ['dashboard-metrics'],
     queryFn: async () => {
       // Total leads ativos (não finalizados)
@@ -27,15 +31,55 @@ export function useDashboardMetrics() {
         .eq('status', 'em_analise')
         .eq('finalizada', false);
 
-      // Taxa de conversão geral: propostas aceitas / total de leads ativos
-      const { count: propostasAceitas } = await supabase
-        .from('propostas')
+      // Taxa de conversão geral: (Nº de conversões ou propostas aceitas) / (Total de leads) × 100
+      // Considera:
+      // 1. Leads finalizados (convertidos em clientes)
+      // 2. Leads com pelo menos uma proposta aceita (independente de finalizada)
+      
+      // Contar leads finalizados
+      const { count: leadsFinalizados } = await supabase
+        .from('leads')
         .select('*', { count: 'exact', head: true })
-        .eq('status', 'aceita')
-        .eq('finalizada', false);
+        .eq('finalizado', true);
 
-      const taxaConversaoGeral = totalLeads && totalLeads > 0 
-        ? ((propostasAceitas || 0) / totalLeads * 100).toFixed(1)
+      // Contar leads com propostas aceitas (buscar leads únicos com propostas aceitas)
+      const { data: propostasAceitas } = await supabase
+        .from('propostas')
+        .select('lead_id')
+        .eq('status', 'aceita');
+
+      // Criar conjunto de leads únicos com propostas aceitas
+      const leadsComPropostasAceitas = new Set(
+        propostasAceitas?.map(p => p.lead_id) || []
+      );
+      const numLeadsComPropostasAceitas = leadsComPropostasAceitas.size;
+
+      // Total de conversões: leads finalizados + leads com propostas aceitas (sem duplicar)
+      // Se um lead está finalizado E tem proposta aceita, conta apenas uma vez
+      let leadsFinalizadosComPropostasSet = new Set<string>();
+      
+      if (leadsComPropostasAceitas.size > 0) {
+        const { data: leadsFinalizadosComPropostas } = await supabase
+          .from('leads')
+          .select('id')
+          .eq('finalizado', true)
+          .in('id', Array.from(leadsComPropostasAceitas));
+
+        leadsFinalizadosComPropostasSet = new Set(
+          leadsFinalizadosComPropostas?.map(l => l.id) || []
+        );
+      }
+
+      // Conversões = leads finalizados + leads com propostas aceitas - duplicados
+      const totalConversoes = (leadsFinalizados || 0) + numLeadsComPropostasAceitas - leadsFinalizadosComPropostasSet.size;
+
+      // Total de leads (ativos + finalizados) para cálculo correto
+      const { count: totalLeadsGeral } = await supabase
+        .from('leads')
+        .select('*', { count: 'exact', head: true });
+
+      const taxaConversaoGeral = totalLeadsGeral && totalLeadsGeral > 0 
+        ? ((totalConversoes / totalLeadsGeral) * 100).toFixed(1)
         : '0';
 
       // Leads por origem (ativos)
@@ -99,6 +143,65 @@ export function useDashboardMetrics() {
     },
     refetchInterval: 60000, // Auto-refresh every 60s
   });
+
+  // Real-time subscriptions para atualização automática
+  useEffect(() => {
+    // Subscription para mudanças em leads
+    const leadsChannel = supabase
+      .channel('dashboard-leads-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'leads',
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
+        }
+      )
+      .subscribe();
+
+    // Subscription para mudanças em propostas
+    const propostasChannel = supabase
+      .channel('dashboard-propostas-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'propostas',
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
+        }
+      )
+      .subscribe();
+
+    // Subscription para mudanças no funil (movimentação de leads)
+    const funilChannel = supabase
+      .channel('dashboard-funil-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'lead_funil',
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(leadsChannel);
+      supabase.removeChannel(propostasChannel);
+      supabase.removeChannel(funilChannel);
+    };
+  }, [queryClient]);
+
+  return query;
 }
 
 export function useFunnelData() {

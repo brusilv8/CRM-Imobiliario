@@ -81,6 +81,8 @@ export function useCreateLead() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['leads'] });
       queryClient.invalidateQueries({ queryKey: ['leads_funil'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
+      queryClient.invalidateQueries({ queryKey: ['atividades-sistema'] });
       toast.success('Lead criado com sucesso!');
     },
     onError: (error: any) => {
@@ -180,9 +182,12 @@ export function useFinalizarLead() {
 
       await supabase.from('atividades_sistema').insert({
         tipo: 'lead_finalizado',
-        titulo: `Lead ${lead?.nome} foi finalizado`,
-        descricao: 'Lead removido do funil e propostas arquivadas',
+        titulo: `🎉 Conversão: Lead ${lead?.nome} foi finalizado`,
+        descricao: 'Lead convertido em cliente - removido do funil e propostas arquivadas',
         lead_id: id,
+        metadata: {
+          evento_conversao: true
+        }
       });
 
       return data as Lead;
@@ -190,6 +195,9 @@ export function useFinalizarLead() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['leads'] });
       queryClient.invalidateQueries({ queryKey: ['leads_funil'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
+      queryClient.invalidateQueries({ queryKey: ['atividades-sistema'] });
+      queryClient.invalidateQueries({ queryKey: ['propostas'] });
       toast.success('Lead finalizado com sucesso!');
     },
     onError: (error: any) => {
@@ -258,6 +266,8 @@ export function useReativarLead() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['leads'] });
       queryClient.invalidateQueries({ queryKey: ['leads_funil'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
+      queryClient.invalidateQueries({ queryKey: ['atividades-sistema'] });
       toast.success('Cliente reativado com sucesso!');
     },
     onError: (error: any) => {

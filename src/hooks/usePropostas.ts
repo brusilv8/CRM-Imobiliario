@@ -153,6 +153,24 @@ export function useUpdatePropostaStatus() {
         metadata: { status_novo: status }
       });
 
+      // Se a proposta foi aceita, registrar evento de conversão especial
+      if (status === 'aceita') {
+        await supabase.from('atividades_sistema').insert({
+          tipo: 'proposta_aceita',
+          titulo: `🎉 Conversão: Proposta ${proposta?.codigo} aceita!`,
+          descricao: proposta?.lead?.nome 
+            ? `Lead ${proposta.lead.nome} teve proposta aceita - Conversão realizada!` 
+            : 'Proposta aceita - Conversão realizada!',
+          proposta_id: id,
+          lead_id: proposta?.lead_id,
+          metadata: { 
+            status_novo: status,
+            evento_conversao: true,
+            valor_proposta: proposta?.valor
+          }
+        });
+      }
+
       return data as Proposta;
     },
     onSuccess: () => {

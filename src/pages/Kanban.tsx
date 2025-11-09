@@ -106,7 +106,15 @@ export default function Kanban() {
       return;
     }
 
-    updateLeadEtapa.mutate({ leadId, etapaId: newEtapaId });
+    // Atualização otimista: mover o card imediatamente na UI
+    // A mutation vai atualizar o backend e corrigir se houver erro
+    updateLeadEtapa.mutate(
+      { leadId, etapaId: newEtapaId },
+      {
+        // Não mostrar toast de sucesso aqui, já que a UI já foi atualizada
+        // O toast será mostrado no onSuccess do hook
+      }
+    );
   };
 
   const handleLeadClick = (lead: Lead) => {

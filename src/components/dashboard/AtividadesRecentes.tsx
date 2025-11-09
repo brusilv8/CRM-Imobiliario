@@ -28,6 +28,7 @@ const iconMap: Record<string, React.ComponentType<any>> = {
   proposta_enviada: FileText,
   proposta_criada: FileText,
   proposta_status_alterado: FileText,
+  proposta_aceita: CheckCircle,
   proposta_finalizada: XCircle,
   proposta_editada: FileText,
   proposta_excluida: XCircle,
@@ -45,6 +46,7 @@ const colorMap: Record<string, string> = {
   proposta_enviada: "bg-status-proposal/10 text-status-proposal",
   proposta_criada: "bg-status-proposal/10 text-status-proposal",
   proposta_status_alterado: "bg-status-proposal/10 text-status-proposal",
+  proposta_aceita: "bg-green-500/20 text-green-600 dark:text-green-400",
   proposta_finalizada: "bg-destructive/10 text-destructive",
   proposta_editada: "bg-secondary/10 text-secondary",
   proposta_excluida: "bg-destructive/10 text-destructive",
@@ -85,6 +87,10 @@ const getBadgeVariant = (tipo: string, metadata?: any): { label: string; variant
 
   if (tipo === "lead_reativado") {
     return { label: "Reativado", variant: "default" };
+  }
+
+  if (tipo === "proposta_aceita") {
+    return { label: "Conversão", variant: "default" };
   }
 
   if (tipo === "proposta_finalizada") {
