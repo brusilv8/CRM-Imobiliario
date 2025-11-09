@@ -244,7 +244,7 @@ export default function Kanban() {
         variant="outline"
         size="icon"
         onClick={scrollToStart}
-        className="fixed left-6 top-1/2 -translate-y-1/2 z-40 shadow-lg hover:shadow-xl transition-shadow"
+        className="fixed left-[280px] top-1/2 -translate-y-1/2 z-40 shadow-lg hover:shadow-xl transition-shadow"
         title="Voltar ao início"
       >
         <ChevronLeft className="w-5 h-5" />
