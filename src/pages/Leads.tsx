@@ -6,6 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLeads } from "@/hooks/useLeads";
 import { LeadFormModal } from "@/components/leads/LeadFormModal";
+import { LeadDetailModal } from "@/components/leads/LeadDetailModal";
+import { LeadFiltersSheet } from "@/components/leads/LeadFiltersSheet";
+import type { Lead } from "@/types/database.types";
 import { 
   Plus, 
   Search, 
@@ -41,13 +44,27 @@ const temperatureLabels = {
 export default function Leads() {
   const [searchTerm, setSearchTerm] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
+  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [filters, setFilters] = useState<{
+    temperatura?: string;
+    origem?: string;
+  }>({});
   const { data: leads, isLoading } = useLeads();
 
-  const filteredLeads = leads?.filter(lead =>
-    lead.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    lead.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    lead.telefone.includes(searchTerm)
-  ) || [];
+  const filteredLeads = leads?.filter(lead => {
+    const matchesSearch = 
+      lead.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      lead.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      lead.telefone.includes(searchTerm);
+    
+    const matchesTemperatura = !filters.temperatura || lead.temperatura === filters.temperatura;
+    const matchesOrigem = !filters.origem || lead.origem === filters.origem;
+    
+    return matchesSearch && matchesTemperatura && matchesOrigem;
+  }) || [];
+
+  const hasActiveFilters = Object.values(filters).some(v => v);
 
   return (
     <div className="space-y-6">
@@ -76,9 +93,18 @@ export default function Leads() {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <Button variant="outline" className="gap-2">
+          <Button 
+            variant={hasActiveFilters ? "default" : "outline"} 
+            className="gap-2"
+            onClick={() => setFiltersOpen(true)}
+          >
             <Filter className="w-4 h-4" />
             Filtros
+            {hasActiveFilters && (
+              <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 flex items-center justify-center">
+                {Object.values(filters).filter(v => v).length}
+              </Badge>
+            )}
           </Button>
         </div>
       </Card>
@@ -103,7 +129,11 @@ export default function Leads() {
           const tempLabel = temperatureLabels[lead.temperatura];
 
             return (
-              <Card key={lead.id} className="p-6 hover:shadow-lg transition-shadow cursor-pointer">
+              <Card 
+                key={lead.id} 
+                className="p-6 hover:shadow-lg transition-shadow cursor-pointer"
+                onClick={() => setSelectedLead(lead)}
+              >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
@@ -161,7 +191,28 @@ export default function Leads() {
         </div>
       )}
 
+      {filteredLeads.length === 0 && !isLoading && (
+        <Card className="p-12 text-center">
+          <p className="text-muted-foreground">
+            {hasActiveFilters || searchTerm
+              ? "Nenhum lead encontrado com os filtros aplicados."
+              : "Nenhum lead cadastrado ainda."}
+          </p>
+        </Card>
+      )}
+
       <LeadFormModal open={modalOpen} onOpenChange={setModalOpen} />
+      <LeadDetailModal 
+        lead={selectedLead} 
+        open={!!selectedLead} 
+        onOpenChange={(open) => !open && setSelectedLead(null)} 
+      />
+      <LeadFiltersSheet
+        open={filtersOpen}
+        onOpenChange={setFiltersOpen}
+        filters={filters}
+        onFiltersChange={setFilters}
+      />
     </div>
   );
 }

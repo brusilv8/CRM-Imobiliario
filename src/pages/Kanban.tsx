@@ -11,7 +11,7 @@ import {
 import { useFunilEtapas, useLeadsFunil, useUpdateLeadEtapa, useSyncLeadsToFunil } from "@/hooks/useFunilEtapas";
 import { KanbanColumn } from "@/components/kanban/KanbanColumn";
 import { LeadCard } from "@/components/kanban/LeadCard";
-import { LeadDetailModal } from "@/components/kanban/LeadDetailModal";
+import { LeadDetailModal } from "@/components/leads/LeadDetailModal";
 import { QuickLeadFormModal } from "@/components/kanban/QuickLeadFormModal";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
