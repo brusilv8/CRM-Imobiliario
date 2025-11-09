@@ -239,27 +239,23 @@ export default function Kanban() {
         </div>
       </div>
 
-      {/* Botão fixo para voltar ao início */}
-      <Button
-        variant="outline"
-        size="icon"
+      {/* Seta para voltar ao início */}
+      <button
         onClick={scrollToStart}
-        className="fixed left-[280px] top-1/2 -translate-y-1/2 z-40 bg-background/70 backdrop-blur-sm hover:bg-background/90 transition-all duration-300 shadow-lg hover:shadow-xl"
+        className="fixed left-[280px] top-1/2 -translate-y-1/2 z-40 text-foreground/70 hover:text-foreground transition-all duration-300 cursor-pointer"
         title="Voltar ao início"
       >
-        <ChevronLeft className="w-5 h-5" />
-      </Button>
+        <ChevronLeft className="w-8 h-8" />
+      </button>
 
-      {/* Botão fixo para ir ao final */}
-      <Button
-        variant="outline"
-        size="icon"
+      {/* Seta para ir ao final */}
+      <button
         onClick={scrollToEnd}
-        className="fixed right-6 top-1/2 -translate-y-1/2 z-40 bg-background/70 backdrop-blur-sm hover:bg-background/90 transition-all duration-300 shadow-lg hover:shadow-xl"
+        className="fixed right-6 top-1/2 -translate-y-1/2 z-40 text-foreground/70 hover:text-foreground transition-all duration-300 cursor-pointer"
         title="Ir para o final"
       >
-        <ChevronRight className="w-5 h-5" />
-      </Button>
+        <ChevronRight className="w-8 h-8" />
+      </button>
 
       <DndContext
         sensors={sensors}
