@@ -16,6 +16,8 @@ import { CalendarIcon } from 'lucide-react';
 import { useLeads } from '@/hooks/useLeads';
 import { useImoveis } from '@/hooks/useImoveis';
 import { useCreateVisita } from '@/hooks/useVisitas';
+import { useAuth } from '@/hooks/useAuth';
+import { useUsuario } from '@/hooks/useUsuarios';
 
 const visitSchema = z.object({
   lead_id: z.string().min(1, 'Selecione um lead'),
@@ -39,6 +41,8 @@ export function VisitFormModal({ open, onOpenChange, initialDate }: VisitFormMod
   const { data: leads } = useLeads();
   const { data: imoveis } = useImoveis();
   const createVisita = useCreateVisita();
+  const { user } = useAuth();
+  const { data: usuario } = useUsuario(user?.id);
 
   const form = useForm<VisitFormData>({
     resolver: zodResolver(visitSchema),
@@ -59,6 +63,7 @@ export function VisitFormModal({ open, onOpenChange, initialDate }: VisitFormMod
     await createVisita.mutateAsync({
       lead_id: data.lead_id,
       imovel_id: data.imovel_id,
+      corretor_id: usuario?.id,
       data_hora: dataHora.toISOString(),
       duracao: data.duracao,
       tipo: data.tipo,
