@@ -244,7 +244,7 @@ export default function Kanban() {
         variant="outline"
         size="icon"
         onClick={scrollToStart}
-        className="fixed left-[280px] top-1/2 -translate-y-1/2 z-40 opacity-0 hover:opacity-100 transition-all duration-300 shadow-lg hover:shadow-xl"
+        className="fixed left-[280px] top-1/2 -translate-y-1/2 z-40 bg-background/70 backdrop-blur-sm hover:bg-background/90 transition-all duration-300 shadow-lg hover:shadow-xl"
         title="Voltar ao início"
       >
         <ChevronLeft className="w-5 h-5" />
@@ -255,7 +255,7 @@ export default function Kanban() {
         variant="outline"
         size="icon"
         onClick={scrollToEnd}
-        className="fixed right-6 top-1/2 -translate-y-1/2 z-40 opacity-0 hover:opacity-100 transition-all duration-300 shadow-lg hover:shadow-xl"
+        className="fixed right-6 top-1/2 -translate-y-1/2 z-40 bg-background/70 backdrop-blur-sm hover:bg-background/90 transition-all duration-300 shadow-lg hover:shadow-xl"
         title="Ir para o final"
       >
         <ChevronRight className="w-5 h-5" />
