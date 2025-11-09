@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { X } from "lucide-react";
 import { 
   Plus, 
   Search, 
@@ -18,6 +19,9 @@ import {
 } from "lucide-react";
 import { useImoveis } from "@/hooks/useImoveis";
 import { PropertyFormModal } from "@/components/properties/PropertyFormModal";
+import { PropertyDetailModal } from "@/components/properties/PropertyDetailModal";
+import { PropertyFiltersSheet, type PropertyFilters } from "@/components/properties/PropertyFiltersSheet";
+import type { Imovel } from "@/types/database.types";
 
 const statusLabels = {
   disponivel: 'Disponível',
@@ -36,14 +40,64 @@ const statusColors = {
 export default function Properties() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedProperty, setSelectedProperty] = useState<Imovel | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+  const [filters, setFilters] = useState<PropertyFilters>({});
   const { data: imoveis, isLoading } = useImoveis();
 
-  const filteredProperties = imoveis?.filter(property =>
-    property.endereco.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    property.cidade.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    property.tipo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    property.bairro.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
+  const filteredProperties = useMemo(() => {
+    let result = imoveis || [];
+
+    // Busca por texto
+    if (searchTerm) {
+      result = result.filter(property =>
+        property.endereco.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        property.cidade.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        property.tipo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        property.bairro.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Aplicar filtros
+    if (filters.tipo) {
+      result = result.filter(p => p.tipo === filters.tipo);
+    }
+    if (filters.finalidade) {
+      result = result.filter(p => p.finalidade === filters.finalidade);
+    }
+    if (filters.status) {
+      result = result.filter(p => p.status === filters.status);
+    }
+    if (filters.cidade) {
+      result = result.filter(p => 
+        p.cidade.toLowerCase().includes(filters.cidade!.toLowerCase())
+      );
+    }
+    if (filters.bairro) {
+      result = result.filter(p => 
+        p.bairro.toLowerCase().includes(filters.bairro!.toLowerCase())
+      );
+    }
+    if (filters.precoMin || filters.precoMax) {
+      result = result.filter(p => {
+        const valor = p.finalidade === 'venda' ? p.valor_venda : p.valor_aluguel;
+        if (!valor) return false;
+        if (filters.precoMin && valor < filters.precoMin) return false;
+        if (filters.precoMax && valor > filters.precoMax) return false;
+        return true;
+      });
+    }
+
+    return result;
+  }, [imoveis, searchTerm, filters]);
+
+  const activeFiltersCount = Object.values(filters).filter(v => v !== undefined).length;
+
+  const handlePropertyClick = (property: Imovel) => {
+    setSelectedProperty(property);
+    setIsDetailModalOpen(true);
+  };
 
   return (
     <div className="space-y-6">
@@ -72,11 +126,80 @@ export default function Properties() {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <Button variant="outline" className="gap-2">
+          <Button 
+            variant="outline" 
+            className="gap-2 relative"
+            onClick={() => setIsFiltersOpen(true)}
+          >
             <Filter className="w-4 h-4" />
             Filtros
+            {activeFiltersCount > 0 && (
+              <Badge variant="secondary" className="ml-1">
+                {activeFiltersCount}
+              </Badge>
+            )}
           </Button>
         </div>
+
+        {/* Active Filters */}
+        {activeFiltersCount > 0 && (
+          <div className="flex flex-wrap gap-2 mt-3">
+            {filters.tipo && (
+              <Badge variant="secondary" className="gap-1">
+                Tipo: {filters.tipo}
+                <X
+                  className="w-3 h-3 cursor-pointer"
+                  onClick={() => setFilters({ ...filters, tipo: undefined })}
+                />
+              </Badge>
+            )}
+            {filters.finalidade && (
+              <Badge variant="secondary" className="gap-1">
+                {filters.finalidade === 'venda' ? 'Venda' : 'Aluguel'}
+                <X
+                  className="w-3 h-3 cursor-pointer"
+                  onClick={() => setFilters({ ...filters, finalidade: undefined })}
+                />
+              </Badge>
+            )}
+            {filters.status && (
+              <Badge variant="secondary" className="gap-1">
+                Status: {statusLabels[filters.status]}
+                <X
+                  className="w-3 h-3 cursor-pointer"
+                  onClick={() => setFilters({ ...filters, status: undefined })}
+                />
+              </Badge>
+            )}
+            {filters.cidade && (
+              <Badge variant="secondary" className="gap-1">
+                {filters.cidade}
+                <X
+                  className="w-3 h-3 cursor-pointer"
+                  onClick={() => setFilters({ ...filters, cidade: undefined })}
+                />
+              </Badge>
+            )}
+            {filters.bairro && (
+              <Badge variant="secondary" className="gap-1">
+                {filters.bairro}
+                <X
+                  className="w-3 h-3 cursor-pointer"
+                  onClick={() => setFilters({ ...filters, bairro: undefined })}
+                />
+              </Badge>
+            )}
+            {(filters.precoMin || filters.precoMax) && (
+              <Badge variant="secondary" className="gap-1">
+                R$ {filters.precoMin || 0} - R$ {filters.precoMax || '∞'}
+                <X
+                  className="w-3 h-3 cursor-pointer"
+                  onClick={() => setFilters({ ...filters, precoMin: undefined, precoMax: undefined })}
+                />
+              </Badge>
+            )}
+          </div>
+        )}
       </Card>
 
       {/* Properties Grid */}
@@ -118,7 +241,11 @@ export default function Properties() {
             const valorFormatado = valor ? valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'A consultar';
             
             return (
-              <Card key={property.id} className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
+              <Card 
+                key={property.id} 
+                className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+                onClick={() => handlePropertyClick(property)}
+              >
                 <div className="relative h-48 bg-muted">
                   {property.imagem_principal ? (
                     <img 
@@ -185,6 +312,17 @@ export default function Properties() {
       )}
 
       <PropertyFormModal open={isModalOpen} onOpenChange={setIsModalOpen} />
+      <PropertyDetailModal 
+        property={selectedProperty}
+        open={isDetailModalOpen}
+        onOpenChange={setIsDetailModalOpen}
+      />
+      <PropertyFiltersSheet
+        open={isFiltersOpen}
+        onOpenChange={setIsFiltersOpen}
+        filters={filters}
+        onFiltersChange={setFilters}
+      />
     </div>
   );
 }

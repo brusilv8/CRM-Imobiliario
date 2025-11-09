@@ -96,6 +96,8 @@ export function useDeleteImovel() {
 
   return useMutation({
     mutationFn: async (id: string) => {
+      // First delete related records if needed
+      // Then delete the property
       const { error } = await supabase
         .from('imoveis')
         .delete()

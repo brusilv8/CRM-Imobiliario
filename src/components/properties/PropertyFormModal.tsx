@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { supabase } from "@/lib/supabase";
 import {
   Dialog,
   DialogContent,
@@ -23,6 +24,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useCreateImovel } from "@/hooks/useImoveis";
 import InputMask from "react-input-mask";
 import { toast } from "sonner";
+import { Upload, X } from "lucide-react";
 
 const propertySchema = z.object({
   tipo: z.string().min(1, "Tipo é obrigatório"),
@@ -56,6 +58,9 @@ interface PropertyFormModalProps {
 
 export function PropertyFormModal({ open, onOpenChange }: PropertyFormModalProps) {
   const [step, setStep] = useState(1);
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const createImovel = useCreateImovel();
   
   const {
@@ -91,6 +96,56 @@ export function PropertyFormModal({ open, onOpenChange }: PropertyFormModalProps
       } catch (error) {
         console.error("Erro ao buscar CEP:", error);
       }
+    }
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Por favor, selecione uma imagem válida');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('A imagem deve ter no máximo 5MB');
+      return;
+    }
+
+    setIsUploading(true);
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+      const filePath = `imoveis/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('imoveis')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('imoveis')
+        .getPublicUrl(filePath);
+
+      setUploadedImage(publicUrl);
+      toast.success('Imagem enviada com sucesso!');
+    } catch (error: any) {
+      console.error('Erro ao fazer upload:', error);
+      toast.error('Erro ao enviar imagem: ' + (error.message || 'Erro desconhecido'));
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const removeImage = () => {
+    setUploadedImage(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
@@ -151,7 +206,9 @@ export function PropertyFormModal({ open, onOpenChange }: PropertyFormModalProps
       banheiros: formValues.banheiros || null,
       vagas: formValues.vagas || null,
       area_total: formValues.area_total || null,
+      area_util: formValues.area_util || null,
       status: formValues.status || 'disponivel',
+      imagem_principal: uploadedImage || null,
     };
     
     console.log('🟢 INÍCIO onSubmit');
@@ -175,6 +232,7 @@ export function PropertyFormModal({ open, onOpenChange }: PropertyFormModalProps
   const handleClose = () => {
     reset();
     setStep(1);
+    setUploadedImage(null);
     onOpenChange(false);
   };
 
@@ -201,6 +259,52 @@ export function PropertyFormModal({ open, onOpenChange }: PropertyFormModalProps
           {/* Step 1: Dados Básicos */}
           {step === 1 && (
             <div className="space-y-4">
+              {/* Upload de Imagem */}
+              <div className="space-y-2">
+                <Label>Imagem Principal</Label>
+                <div className="flex flex-col gap-3">
+                  {uploadedImage ? (
+                    <div className="relative rounded-lg overflow-hidden border">
+                      <img
+                        src={uploadedImage}
+                        alt="Preview"
+                        className="w-full h-48 object-cover"
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        className="absolute top-2 right-2"
+                        onClick={removeImage}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div
+                      onClick={() => fileInputRef.current?.click()}
+                      className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:bg-muted/50 transition-colors"
+                    >
+                      <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+                      <p className="text-sm text-muted-foreground">
+                        {isUploading ? 'Enviando...' : 'Clique para adicionar uma imagem'}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        PNG, JPG ou WEBP (máx. 5MB)
+                      </p>
+                    </div>
+                  )}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                    disabled={isUploading}
+                  />
+                </div>
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Tipo *</Label>
