@@ -41,18 +41,20 @@ export function FinalizarLeadButton({ leadId, leadNome, onSuccess }: FinalizarLe
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Finalizar Lead</AlertDialogTitle>
-          <AlertDialogDescription>
-            Deseja marcar <strong>{leadNome}</strong> como finalizado e convertê-lo em cliente?
-            <br />
-            <br />
-            Esta ação irá:
-            <ul className="list-disc list-inside mt-2 space-y-1">
-              <li>Remover o lead do funil de vendas principal</li>
-              <li>Movê-lo para a área de Clientes</li>
-              <li>Manter todo o histórico de propostas e interações</li>
-            </ul>
-            <br />
-            Você poderá reativar o cliente a qualquer momento.
+          <AlertDialogDescription asChild>
+            <div>
+              Deseja marcar <strong>{leadNome}</strong> como finalizado e convertê-lo em cliente?
+              <br />
+              <br />
+              Esta ação irá:
+              <ul className="list-disc list-inside mt-2 space-y-1">
+                <li>Remover o lead do funil de vendas principal</li>
+                <li>Movê-lo para a área de Clientes</li>
+                <li>Manter todo o histórico de propostas e interações</li>
+              </ul>
+              <br />
+              Você poderá reativar o cliente a qualquer momento.
+            </div>
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
