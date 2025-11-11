@@ -170,7 +170,7 @@ export function ProposalFormModal({ open, onOpenChange, proposta }: ProposalForm
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form className="space-y-6">
             {step === 1 && (
               <div className="space-y-4">
                 {eligibleLeads.length === 0 && (
@@ -451,12 +451,22 @@ export function ProposalFormModal({ open, onOpenChange, proposta }: ProposalForm
               </Button>
 
               {step < 3 ? (
-                <Button type="button" onClick={nextStep}>
+                <Button
+                  type="button"
+                  onClick={async () => {
+                    const isValid = await form.trigger();
+                    if (isValid) nextStep();
+                  }}
+                >
                   Próximo
                   <ChevronRight className="ml-2 h-4 w-4" />
                 </Button>
               ) : (
-                <Button type="submit" disabled={createProposta.isPending}>
+                <Button
+                  type="button"
+                  onClick={() => form.handleSubmit(onSubmit)()}
+                  disabled={createProposta.isPending}
+                >
                   {createProposta.isPending ? 'Criando...' : 'Criar Proposta'}
                 </Button>
               )}
