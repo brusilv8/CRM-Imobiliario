@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useLeads } from '@/hooks/useLeads';
+import { useCustomers } from '@/hooks/useCustomers';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -20,7 +20,7 @@ import { Badge } from '@/components/ui/badge';
 import { useReativarLead } from '@/hooks/useLeads';
 
 export default function Customers() {
-  const { data: leads, isLoading } = useLeads();
+  const { data: leads, isLoading } = useCustomers();
   const reativarLead = useReativarLead();
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
