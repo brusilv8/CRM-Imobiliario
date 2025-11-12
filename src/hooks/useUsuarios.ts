@@ -27,7 +27,7 @@ export function useUsuario(userId?: string) {
       const { data, error } = await supabase
         .from('usuarios')
         .select('*')
-        .eq('auth_user_id', userId)
+        .eq('auth_id', userId)
         .maybeSingle();
 
       // Se não encontrar usuário, tentar criar
@@ -37,7 +37,7 @@ export function useUsuario(userId?: string) {
           const { data: newUser, error: insertError } = await supabase
             .from('usuarios')
             .insert({
-              auth_user_id: user.id,
+              auth_id: user.id,
               email: user.email,
               nome_completo: user.email?.split('@')[0] || 'Usuário',
               ativo: true,
