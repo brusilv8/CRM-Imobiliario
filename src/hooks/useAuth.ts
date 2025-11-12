@@ -47,7 +47,7 @@ export function useAuth() {
 
   const signUp = async (email: string, password: string, nome: string) => {
     try {
-      const redirectUrl = `${window.location.origin}/`;
+      const redirectUrl = `${window.location.origin}/dashboard`;
       
       const { error, data } = await supabase.auth.signUp({
         email,
@@ -55,27 +55,38 @@ export function useAuth() {
         options: {
           emailRedirectTo: redirectUrl,
           data: {
-            nome
+            nome_completo: nome,
+            email: email
           }
         }
       });
 
       if (error) throw error;
 
-      // Create user profile
-      if (data.user) {
-        await supabase.from('usuarios').insert({
-          auth_id: data.user.id,
-          nome,
-          email,
-          ativo: true
-        });
+      // O perfil será criado automaticamente pelo trigger do Supabase
+      // após a confirmação do email
+      
+      if (data?.user?.identities?.length === 0) {
+        toast.error('Este email já está cadastrado');
+        return { error: new Error('Email já cadastrado') };
       }
 
-      toast.success('Cadastro realizado! Verifique seu email.');
+      toast.success('Cadastro realizado! Verifique seu email para confirmar.');
       return { error: null };
     } catch (error: any) {
-      toast.error(error.message || 'Erro ao cadastrar');
+      console.error('Erro no cadastro:', error);
+      
+      // Tratamento de erros específicos
+      if (error.message?.includes('already registered')) {
+        toast.error('Este email já está cadastrado');
+      } else if (error.message?.includes('Invalid email')) {
+        toast.error('Email inválido');
+      } else if (error.message?.includes('Password')) {
+        toast.error('Senha muito fraca. Use no mínimo 6 caracteres');
+      } else {
+        toast.error(error.message || 'Erro ao cadastrar. Tente novamente.');
+      }
+      
       return { error };
     }
   };
