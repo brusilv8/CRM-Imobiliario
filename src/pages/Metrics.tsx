@@ -1,7 +1,7 @@
 import { MetricsChart } from "@/components/dashboard/MetricsChart";
 import { OriginChart } from "@/components/dashboard/OriginChart";
 import { VisitsChart } from "@/components/dashboard/VisitsChart";
-import { FunnelChart } from "@/components/dashboard/FunnelChart";
+import { LeadsEvolutionChart } from "@/components/dashboard/LeadsEvolutionChart";
 import { useDashboardMetrics } from "@/hooks/useDashboardMetrics";
 import { useImoveis } from "@/hooks/useImoveis";
 import { usePropostas } from "@/hooks/usePropostas";
@@ -48,9 +48,9 @@ export default function Metrics() {
         </p>
       </div>
 
-      {/* Funil de Vendas - Destaque Principal */}
+      {/* Evolução de Leads - Destaque Principal */}
       <div className="grid grid-cols-1">
-        <FunnelChart />
+        <LeadsEvolutionChart />
       </div>
 
       {/* Métricas de Propostas e Imóveis */}
