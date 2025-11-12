@@ -7,7 +7,8 @@ import {
   BarChart3,
   Settings,
   UserCheck,
-  History
+  History,
+  TrendingUp
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -25,6 +26,7 @@ import {
 
 const menuItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Métricas", url: "/metrics", icon: TrendingUp },
   { title: "Leads", url: "/leads", icon: Users },
   { title: "Funil de Vendas", url: "/kanban", icon: BarChart3 },
   { title: "Imóveis", url: "/properties", icon: Home },

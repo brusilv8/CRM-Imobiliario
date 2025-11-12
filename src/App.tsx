@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AppLayout } from "./components/layout/AppLayout";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
+import Metrics from "./pages/Metrics";
 import Leads from "./pages/Leads";
 import Properties from "./pages/Properties";
 import Kanban from "./pages/Kanban";
@@ -43,6 +44,13 @@ const App = () => (
             <ProtectedRoute>
               <AppLayout>
                 <Dashboard />
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/metrics" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <Metrics />
               </AppLayout>
             </ProtectedRoute>
           } />
