@@ -62,29 +62,20 @@ export function useAuth() {
 
       if (error) throw error;
 
-      // O perfil do usuário será criado automaticamente via trigger do Supabase
-      // após o usuário confirmar o email
-      
-      if (data.user?.identities?.length === 0) {
-        toast.error('Este email já está cadastrado.');
-        return { error: { message: 'Email já cadastrado' } };
+      // Create user profile
+      if (data.user) {
+        await supabase.from('usuarios').insert({
+          auth_id: data.user.id,
+          nome,
+          email,
+          ativo: true
+        });
       }
 
-      toast.success('Cadastro realizado! Verifique seu email para confirmar.');
+      toast.success('Cadastro realizado! Verifique seu email.');
       return { error: null };
     } catch (error: any) {
-      const errorMessage = error.message || 'Erro ao cadastrar';
-      
-      if (errorMessage.includes('already registered')) {
-        toast.error('Este email já está cadastrado.');
-      } else if (errorMessage.includes('invalid email')) {
-        toast.error('Email inválido.');
-      } else if (errorMessage.includes('password')) {
-        toast.error('A senha deve ter pelo menos 6 caracteres.');
-      } else {
-        toast.error(errorMessage);
-      }
-      
+      toast.error(error.message || 'Erro ao cadastrar');
       return { error };
     }
   };
