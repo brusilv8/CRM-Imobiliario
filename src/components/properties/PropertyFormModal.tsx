@@ -31,6 +31,8 @@ import { useEffect } from "react";
 const propertySchema = z.object({
   tipo: z.string().min(1, "Tipo é obrigatório"),
   finalidade: z.enum(["venda", "aluguel"]),
+  proprietario_nome: z.string().min(1, "Nome do proprietário é obrigatório"),
+  proprietario_telefone: z.string().min(10, "Telefone do proprietário é obrigatório"),
   cep: z.string().min(8, "CEP inválido"),
   endereco: z.string().min(1, "Endereço é obrigatório"),
   cidade: z.string().min(1, "Cidade é obrigatória"),
@@ -92,6 +94,8 @@ export function PropertyFormModal({ open, onOpenChange, property }: PropertyForm
     if (property && open) {
       setValue("tipo", property.tipo);
       setValue("finalidade", property.finalidade);
+      setValue("proprietario_nome", property.proprietario_nome);
+      setValue("proprietario_telefone", property.proprietario_telefone);
       setValue("cep", property.cep);
       setValue("endereco", property.endereco);
       setValue("cidade", property.cidade);
@@ -220,6 +224,8 @@ export function PropertyFormModal({ open, onOpenChange, property }: PropertyForm
     const payload = {
       tipo: formValues.tipo,
       finalidade: formValues.finalidade,
+      proprietario_nome: formValues.proprietario_nome,
+      proprietario_telefone: formValues.proprietario_telefone,
       descricao: formValues.descricao || null,
       endereco: formValues.endereco,
       numero: formValues.numero || null,
@@ -370,6 +376,28 @@ export function PropertyFormModal({ open, onOpenChange, property }: PropertyForm
                       <Label htmlFor="aluguel">Aluguel</Label>
                     </div>
                   </RadioGroup>
+                </div>
+              </div>
+
+              <div className="space-y-2 p-4 bg-muted/30 rounded-lg">
+                <h4 className="font-semibold text-sm">Dados do Proprietário</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Nome do Proprietário *</Label>
+                    <Input {...register("proprietario_nome")} placeholder="Nome completo" />
+                    {errors.proprietario_nome && <p className="text-sm text-destructive">{errors.proprietario_nome.message}</p>}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Telefone do Proprietário *</Label>
+                    <InputMask
+                      mask="(99) 99999-9999"
+                      {...register("proprietario_telefone")}
+                    >
+                      {(inputProps: any) => <Input {...inputProps} placeholder="(00) 00000-0000" />}
+                    </InputMask>
+                    {errors.proprietario_telefone && <p className="text-sm text-destructive">{errors.proprietario_telefone.message}</p>}
+                  </div>
                 </div>
               </div>
 

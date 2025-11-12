@@ -91,6 +91,8 @@ export interface Imovel {
   id: string;
   tipo: string;
   finalidade: 'venda' | 'aluguel';
+  proprietario_nome: string;
+  proprietario_telefone: string;
   cep: string;
   endereco: string;
   cidade: string;

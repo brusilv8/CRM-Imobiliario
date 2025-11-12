@@ -135,9 +135,9 @@ export function useDashboardMetrics() {
         propostasAnalise: propostasAnalise || 0,
         taxaConversao: parseFloat(taxaConversaoGeral),
         conversaoEtapas,
-        leadsPorOrigem: Object.entries(origemCounts).map(([origem, total]) => ({
+        leadsPorOrigem: Object.entries(origemCounts).map(([origem, count]) => ({
           origem,
-          total
+          count
         }))
       };
     },
