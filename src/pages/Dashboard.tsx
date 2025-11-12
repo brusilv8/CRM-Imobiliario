@@ -7,6 +7,7 @@ import {
   Target
 } from "lucide-react";
 import { StatCard } from "@/components/dashboard/StatCard";
+import { FunnelChart } from "@/components/dashboard/FunnelChart";
 import { AtividadesRecentes } from "@/components/dashboard/AtividadesRecentes";
 import { useDashboardMetrics } from "@/hooks/useDashboardMetrics";
 import { useImoveis } from "@/hooks/useImoveis";
@@ -66,9 +67,14 @@ export default function Dashboard() {
         />
       </div>
 
-      {/* Atividades Recentes */}
-      <div className="grid grid-cols-1">
-        <AtividadesRecentes />
+      {/* Funil de Vendas e Atividades Recentes */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <FunnelChart />
+        </div>
+        <div>
+          <AtividadesRecentes />
+        </div>
       </div>
     </div>
   );
