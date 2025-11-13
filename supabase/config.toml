@@ -1,3 +1,5 @@
+project_id = "bqywfqehoziqxbobqxyl"
+
 # Google Calendar Auth - Inicia fluxo OAuth2
 [functions.google-calendar-auth]
 verify_jwt = false
