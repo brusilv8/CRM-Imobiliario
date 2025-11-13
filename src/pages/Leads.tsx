@@ -54,9 +54,9 @@ export default function Leads() {
 
   const filteredLeads = leads?.filter(lead => {
     const matchesSearch = 
-      lead.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      lead.nome?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       lead.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      lead.telefone.includes(searchTerm);
+      lead.telefone?.includes(searchTerm);
     
     const matchesTemperatura = !filters.temperatura || lead.temperatura === filters.temperatura;
     const matchesOrigem = !filters.origem || lead.origem === filters.origem;
