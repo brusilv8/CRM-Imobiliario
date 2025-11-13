@@ -11,6 +11,7 @@ import Leads from "./pages/Leads";
 import Properties from "./pages/Properties";
 import Kanban from "./pages/Kanban";
 import Calendar from "./pages/Calendar";
+import GoogleCalendarCallback from "./pages/GoogleCalendarCallback";
 import Proposals from "./pages/Proposals";
 import Customers from "./pages/Customers";
 import ProposalHistory from "./pages/ProposalHistory";
@@ -33,6 +34,7 @@ const App = () => (
       >
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/google-calendar-callback" element={<GoogleCalendarCallback />} />
           <Route path="/" element={
             <ProtectedRoute>
               <AppLayout>
