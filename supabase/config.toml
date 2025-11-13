@@ -1,0 +1,15 @@
+# Google Calendar Auth - Inicia fluxo OAuth2
+[functions.google-calendar-auth]
+verify_jwt = false
+
+# Google Calendar Callback - Recebe código OAuth2 e troca por tokens
+[functions.google-calendar-callback]
+verify_jwt = false
+
+# Google Calendar Sync - Sincroniza eventos entre CRM e Google Calendar
+[functions.google-calendar-sync]
+verify_jwt = true
+
+# Google Calendar Webhook - Recebe notificações do Google Calendar
+[functions.google-calendar-webhook]
+verify_jwt = false

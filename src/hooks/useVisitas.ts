@@ -42,6 +42,23 @@ export function useCreateVisita() {
         descricao: `Visita agendada para ${new Date(visita.data_hora).toLocaleString('pt-BR')}`
       });
 
+      // Sincronizar com Google Calendar
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          await supabase.functions.invoke('google-calendar-sync', {
+            body: { 
+              action: 'create',
+              visitaId: data.id,
+              visitaData: data
+            }
+          });
+        }
+      } catch (syncError) {
+        console.error('Erro ao sincronizar com Google Calendar:', syncError);
+        // Não falhar a criação se a sincronização falhar
+      }
+
       return data as Visita;
     },
     onSuccess: () => {
@@ -67,6 +84,23 @@ export function useUpdateVisita() {
         .single();
 
       if (error) throw error;
+
+      // Sincronizar com Google Calendar
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          await supabase.functions.invoke('google-calendar-sync', {
+            body: { 
+              action: 'update',
+              visitaId: id,
+              visitaData: data
+            }
+          });
+        }
+      } catch (syncError) {
+        console.error('Erro ao sincronizar com Google Calendar:', syncError);
+      }
+
       return data as Visita;
     },
     onSuccess: () => {
