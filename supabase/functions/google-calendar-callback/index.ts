@@ -16,13 +16,15 @@ serve(async (req) => {
     
     const clientId = Deno.env.get('GOOGLE_CALENDAR_CLIENT_ID');
     const clientSecret = Deno.env.get('GOOGLE_CALENDAR_CLIENT_SECRET');
-    const redirectUri = `${req.headers.get('origin')}/api/google-calendar-callback`;
+    const origin = req.headers.get('origin') || '';
+    const redirectUri = `${origin}/google-calendar-callback`;
 
     if (!clientId || !clientSecret) {
       throw new Error('Google Calendar credentials not configured');
     }
 
     console.log('Exchanging code for tokens...');
+    console.log('Redirect URI:', redirectUri);
 
     // Trocar código por tokens
     const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {

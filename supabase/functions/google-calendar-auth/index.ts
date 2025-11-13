@@ -12,11 +12,15 @@ serve(async (req) => {
 
   try {
     const clientId = Deno.env.get('GOOGLE_CALENDAR_CLIENT_ID');
-    const redirectUri = `${req.headers.get('origin')}/api/google-calendar-callback`;
+    const origin = req.headers.get('origin') || '';
+    const redirectUri = `${origin}/google-calendar-callback`;
 
     if (!clientId) {
       throw new Error('Google Calendar Client ID not configured');
     }
+
+    console.log('Origin:', origin);
+    console.log('Redirect URI:', redirectUri);
 
     // Construir URL de autorização do Google
     const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');

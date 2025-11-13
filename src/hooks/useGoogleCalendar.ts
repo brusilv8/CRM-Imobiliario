@@ -59,42 +59,44 @@ export function useConnectGoogleCalendar() {
         throw new Error('Popup bloqueado. Por favor, permita popups para este site.');
       }
 
-      // Aguardar callback
+      // Aguardar mensagem do callback
       return new Promise((resolve, reject) => {
+        const messageHandler = async (event: MessageEvent) => {
+          if (event.data.type === 'google-calendar-code') {
+            window.removeEventListener('message', messageHandler);
+            
+            try {
+              // Trocar código por tokens
+              const { data, error } = await supabase.functions.invoke('google-calendar-callback', {
+                body: { code: event.data.code, userId: session.user.id }
+              });
+
+              if (error) reject(error);
+              else resolve(data);
+            } catch (err) {
+              reject(err);
+            }
+          } else if (event.data.type === 'google-calendar-error') {
+            window.removeEventListener('message', messageHandler);
+            reject(new Error(event.data.error));
+          }
+        };
+
+        window.addEventListener('message', messageHandler);
+
+        // Verificar se popup foi fechado
         const checkInterval = setInterval(() => {
-          try {
-            if (authWindow.closed) {
-              clearInterval(checkInterval);
-              reject(new Error('Autorização cancelada'));
-            }
-
-            // Verificar se a janela foi redirecionada para o callback
-            const authUrl = authWindow.location.href;
-            if (authUrl.includes('code=')) {
-              const url = new URL(authUrl);
-              const code = url.searchParams.get('code');
-              
-              if (code) {
-                authWindow.close();
-                clearInterval(checkInterval);
-
-                // Trocar código por tokens
-                supabase.functions.invoke('google-calendar-callback', {
-                  body: { code, userId: session.user.id }
-                }).then(({ data, error }) => {
-                  if (error) reject(error);
-                  else resolve(data);
-                });
-              }
-            }
-          } catch (e) {
-            // Ignorar erros de CORS ao verificar URL
+          if (authWindow.closed) {
+            clearInterval(checkInterval);
+            window.removeEventListener('message', messageHandler);
+            reject(new Error('Autorização cancelada'));
           }
         }, 500);
 
         // Timeout após 5 minutos
         setTimeout(() => {
           clearInterval(checkInterval);
+          window.removeEventListener('message', messageHandler);
           if (!authWindow.closed) {
             authWindow.close();
           }
