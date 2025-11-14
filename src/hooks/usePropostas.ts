@@ -127,6 +127,12 @@ export function useUpdatePropostaStatus() {
 
   return useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      // Validate status value
+      const validStatuses = ['pendente', 'em_analise', 'aceita', 'recusada', 'cancelada'];
+      if (!validStatuses.includes(status)) {
+        throw new Error(`Status inválido: ${status}. Valores permitidos: ${validStatuses.join(', ')}`);
+      }
+
       // Get proposta details first
       const { data: proposta } = await supabase
         .from('propostas')
@@ -141,7 +147,16 @@ export function useUpdatePropostaStatus() {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        // Check if it's a constraint violation
+        if (error.code === '23514' && error.message?.includes('propostas_status_check')) {
+          throw new Error(
+            'Erro de constraint no banco de dados. O status não é permitido pela constraint atual. ' +
+            'Execute o script fix_propostas_status.sql no Supabase SQL Editor para corrigir.'
+          );
+        }
+        throw error;
+      }
 
       // Register system activity for status change
       await supabase.from('atividades_sistema').insert({
@@ -180,7 +195,10 @@ export function useUpdatePropostaStatus() {
       toast.success('Status atualizado com sucesso!');
     },
     onError: (error: any) => {
-      toast.error(error.message || 'Erro ao atualizar status');
+      const errorMessage = error.message || 'Erro ao atualizar status';
+      toast.error(errorMessage, {
+        duration: error.code === '23514' ? 8000 : 4000, // Longer duration for constraint errors
+      });
     },
   });
 }
